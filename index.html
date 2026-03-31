@@ -32,7 +32,6 @@ body {
   margin: 0 auto;
 }
 
-/* Header */
 .app-header {
   background: var(--text);
   color: #fff;
@@ -68,7 +67,6 @@ body {
   color: rgba(255,255,255,0.5);
 }
 
-/* Nav */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -101,11 +99,9 @@ body {
 .nav-btn.active { color: #fff; }
 .nav-btn .nav-icon { font-size: 18px; }
 
-/* Pages */
 .page { display: none; padding: 20px 16px 80px; }
 .page.active { display: block; }
 
-/* Summary cards */
 .summary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -146,7 +142,6 @@ body {
   margin-top: 4px;
 }
 
-/* Rule bar */
 .rule-bar {
   background: var(--surface);
   border-radius: 12px;
@@ -187,7 +182,6 @@ body {
 
 .rule-pct { font-weight: 700; color: var(--green); }
 
-/* Trade list */
 .section-title {
   font-size: 11px;
   color: var(--muted);
@@ -225,10 +219,7 @@ body {
 .trade-pair { font-size: 13px; font-weight: 700; }
 .trade-date { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
-.trade-rule {
-  font-size: 10px;
-  margin-top: 3px;
-}
+.trade-rule { font-size: 10px; margin-top: 3px; }
 .trade-rule.ok { color: var(--green); }
 .trade-rule.ng { color: var(--red); }
 
@@ -252,7 +243,6 @@ body {
   white-space: nowrap;
 }
 
-/* Add form */
 .form-card {
   background: var(--surface);
   border-radius: 16px;
@@ -297,12 +287,7 @@ body {
 
 .form-textarea { resize: none; height: 70px; }
 
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-.toggle-group {
-  display: flex;
-  gap: 8px;
-}
+.toggle-group { display: flex; gap: 8px; }
 
 .toggle-btn {
   flex: 1;
@@ -318,33 +303,31 @@ body {
   color: var(--muted);
 }
 
-.toggle-btn.selected-buy {
-  background: rgba(43,122,200,0.1);
-  border-color: var(--accent2);
-  color: var(--accent2);
-  font-weight: 700;
+.toggle-btn.selected-buy { background: rgba(43,122,200,0.1); border-color: var(--accent2); color: var(--accent2); font-weight: 700; }
+.toggle-btn.selected-sell { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
+.toggle-btn.selected-yes { background: rgba(42,122,75,0.1); border-color: var(--green); color: var(--green); font-weight: 700; }
+.toggle-btn.selected-no { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
+
+/* pips行 */
+.pips-row { display: flex; gap: 8px; align-items: stretch; }
+
+.sign-btn {
+  flex: 0 0 52px;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 22px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  color: var(--muted);
+  line-height: 1;
 }
 
-.toggle-btn.selected-sell {
-  background: rgba(200,57,43,0.1);
-  border-color: var(--red);
-  color: var(--red);
-  font-weight: 700;
-}
-
-.toggle-btn.selected-yes {
-  background: rgba(42,122,75,0.1);
-  border-color: var(--green);
-  color: var(--green);
-  font-weight: 700;
-}
-
-.toggle-btn.selected-no {
-  background: rgba(200,57,43,0.1);
-  border-color: var(--red);
-  color: var(--red);
-  font-weight: 700;
-}
+.sign-btn.sign-plus-active { background: rgba(42,122,75,0.1); border-color: var(--green); color: var(--green); font-weight: 700; }
+.sign-btn.sign-minus-active { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
 
 .submit-btn {
   width: 100%;
@@ -362,7 +345,6 @@ body {
 
 .submit-btn:active { opacity: 0.8; }
 
-/* Monthly */
 .month-table {
   background: var(--surface);
   border-radius: 12px;
@@ -371,11 +353,7 @@ body {
   margin-bottom: 16px;
 }
 
-.month-table table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
+.month-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
 
 .month-table th {
   background: var(--text);
@@ -401,7 +379,6 @@ body {
 .td-neg { color: var(--red); font-weight: 700; }
 .td-month { font-weight: 700; color: var(--text); }
 
-/* Rakutore banner */
 .rakutore-banner {
   background: var(--text);
   border-radius: 14px;
@@ -421,27 +398,9 @@ body {
   border-radius: 50%;
 }
 
-.banner-tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-.banner-title {
-  font-size: 17px;
-  font-weight: 900;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.banner-desc {
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.7;
-  margin-bottom: 14px;
-}
+.banner-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 8px; }
+.banner-title { font-size: 17px; font-weight: 900; margin-bottom: 6px; line-height: 1.4; }
+.banner-desc { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 14px; }
 
 .banner-btn {
   display: inline-block;
@@ -455,7 +414,6 @@ body {
   cursor: pointer;
 }
 
-/* Rules reminder */
 .rules-card {
   background: var(--surface);
   border-radius: 12px;
@@ -464,41 +422,16 @@ body {
   margin-bottom: 16px;
 }
 
-.rules-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-}
+.rules-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 
-.rules-list li {
-  display: flex;
-  gap: 10px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text);
-}
+.rules-list li { display: flex; gap: 10px; font-size: 12px; line-height: 1.5; color: var(--text); }
 
-.rule-num {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: var(--accent);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
+.rule-num { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
 
-/* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--muted);
-}
-
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
 .empty-icon { font-size: 40px; margin-bottom: 12px; }
 .empty-text { font-size: 13px; line-height: 1.7; }
 
-/* Toast */
 .toast {
   position: fixed;
   bottom: 80px;
@@ -515,19 +448,21 @@ body {
   white-space: nowrap;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .delete-btn {
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 22px;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
 </head>
@@ -543,13 +478,12 @@ body {
   </div>
 </header>
 
-<!-- Pages -->
 <div class="page active" id="page-home">
   <div class="summary-grid">
     <div class="summary-card">
       <div class="card-label">TOTAL PIPS</div>
       <div class="card-value" id="total-pips">+0.0</div>
-      <div class="card-sub" id="total-yen">¥0</div>
+      <div class="card-sub" id="total-year"></div>
     </div>
     <div class="summary-card">
       <div class="card-label">WIN RATE</div>
@@ -578,7 +512,7 @@ body {
   <div class="trade-list" id="trade-list">
     <div class="empty-state">
       <div class="empty-icon">📋</div>
-      <div class="empty-text">まだ記録がありません。<br>右下の＋ボタンから記録を追加してください。</div>
+      <div class="empty-text">まだ記録がありません。<br>記録タブから追加してください。</div>
     </div>
   </div>
 </div>
@@ -595,12 +529,23 @@ body {
     <div class="form-group">
       <label class="form-label">PAIR</label>
       <select class="form-select" id="input-pair">
-        <option value="GBPJPY">GBP/JPY</option>
-        <option value="GBPAUD">GBP/AUD</option>
-        <option value="USDJPY">USD/JPY</option>
-        <option value="EURJPY">EUR/JPY</option>
-        <option value="EURUSD">EUR/USD</option>
-        <option value="OTHER">その他</option>
+        <optgroup label="メジャー">
+          <option value="EURUSD">EUR/USD</option>
+          <option value="USDJPY">USD/JPY</option>
+          <option value="GBPUSD">GBP/USD</option>
+          <option value="USDCHF">USD/CHF</option>
+          <option value="AUDUSD">AUD/USD</option>
+          <option value="USDCAD">USD/CAD</option>
+          <option value="NZDUSD">NZD/USD</option>
+        </optgroup>
+        <optgroup label="クロス円">
+          <option value="EURJPY">EUR/JPY</option>
+          <option value="GBPJPY">GBP/JPY</option>
+          <option value="AUDJPY">AUD/JPY</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="OTHER">その他</option>
+        </optgroup>
       </select>
     </div>
 
@@ -612,14 +557,17 @@ body {
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">LOTS</label>
-        <input type="number" class="form-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
-      </div>
-      <div class="form-group">
-        <label class="form-label">RESULT (pips)</label>
-        <input type="number" class="form-input" id="input-pips" placeholder="±0.0" step="0.1">
+    <div class="form-group">
+      <label class="form-label">LOTS</label>
+      <input type="number" class="form-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">RESULT (pips)</label>
+      <div class="pips-row">
+        <button class="sign-btn" id="btn-plus" onclick="selectSign('+')">＋</button>
+        <button class="sign-btn" id="btn-minus" onclick="selectSign('−')">－</button>
+        <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1">
       </div>
     </div>
 
@@ -694,7 +642,6 @@ body {
   </div>
 </div>
 
-<!-- Bottom Nav -->
 <nav class="bottom-nav">
   <button class="nav-btn active" onclick="showPage('home', this)">
     <span class="nav-icon">📊</span>
@@ -717,11 +664,11 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// State
 let trades = JSON.parse(localStorage.getItem('fx_trades') || '[]');
 let selectedDir = null;
 let selectedRule = null;
 let selectedSL = null;
+let selectedSign = '+';
 
 const DEFAULT_RULES = [
   'MA3本が同じ向きに揃っている',
@@ -780,12 +727,12 @@ function hideRuleEditor() {
   document.querySelector('.rules-card').style.display = 'block';
 }
 
-// Init
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
   document.getElementById('today-date').textContent =
     today.toLocaleDateString('ja-JP', {month:'short', day:'numeric', weekday:'short'});
   document.getElementById('input-date').value = today.toISOString().split('T')[0];
+  selectSign('+');
   render();
   renderRules();
 });
@@ -816,40 +763,37 @@ function selectSL(val) {
   document.getElementById('btn-sl-yes').className = 'toggle-btn' + (val === 'YES' ? ' selected-no' : '');
 }
 
+function selectSign(sign) {
+  selectedSign = sign;
+  document.getElementById('btn-plus').className = 'sign-btn' + (sign === '+' ? ' sign-plus-active' : '');
+  document.getElementById('btn-minus').className = 'sign-btn' + (sign === '−' ? ' sign-minus-active' : '');
+}
+
 function addTrade() {
   const date = document.getElementById('input-date').value;
   const pair = document.getElementById('input-pair').value;
   const lots = parseFloat(document.getElementById('input-lots').value);
-  const pips = parseFloat(document.getElementById('input-pips').value);
+  const pipsRaw = parseFloat(document.getElementById('input-pips').value);
   const memo = document.getElementById('input-memo').value;
 
-  if (!date || !pair || !selectedDir || isNaN(lots) || isNaN(pips) || !selectedRule || !selectedSL) {
+  if (!date || !pair || !selectedDir || isNaN(lots) || isNaN(pipsRaw) || !selectedRule || !selectedSL) {
     showToast('⚠️ 全項目を入力してください');
     return;
   }
 
-  const trade = {
-    id: Date.now(),
-    date, pair,
-    dir: selectedDir,
-    lots,
-    pips,
-    yen: Math.round(pips * lots * 1000),
-    rule: selectedRule,
-    sl: selectedSL,
-    memo
-  };
+  const pips = selectedSign === '−' ? -Math.abs(pipsRaw) : Math.abs(pipsRaw);
 
+  const trade = { id: Date.now(), date, pair, dir: selectedDir, lots, pips, rule: selectedRule, sl: selectedSL, memo };
   trades.unshift(trade);
   localStorage.setItem('fx_trades', JSON.stringify(trades));
 
-  // Reset form
   document.getElementById('input-lots').value = '';
   document.getElementById('input-pips').value = '';
   document.getElementById('input-memo').value = '';
   selectedDir = null; selectedRule = null; selectedSL = null;
   ['btn-buy','btn-sell','btn-rule-yes','btn-rule-no','btn-sl-no','btn-sl-yes']
     .forEach(id => document.getElementById(id).className = 'toggle-btn');
+  selectSign('+');
 
   render();
   showToast('✓ 記録しました');
@@ -864,11 +808,9 @@ function deleteTrade(id) {
 }
 
 function render() {
-  // Stats
   const now = new Date();
   const thisYear = trades.filter(t => new Date(t.date).getFullYear() === now.getFullYear());
   const totalPips = thisYear.reduce((s, t) => s + t.pips, 0);
-  const totalYen = thisYear.reduce((s, t) => s + t.yen, 0);
   const wins = thisYear.filter(t => t.pips > 0).length;
   const losses = thisYear.filter(t => t.pips < 0).length;
   const winRate = thisYear.length > 0 ? Math.round(wins / thisYear.length * 100) : null;
@@ -878,21 +820,17 @@ function render() {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
   const monthPips = thisMonth.reduce((s, t) => s + t.pips, 0);
-
   const ruleOk = thisYear.filter(t => t.rule === 'YES').length;
   const rulePct = thisYear.length > 0 ? Math.round(ruleOk / thisYear.length * 100) : null;
 
-  // Update stats
   const pipEl = document.getElementById('total-pips');
   pipEl.textContent = (totalPips >= 0 ? '+' : '') + totalPips.toFixed(1);
   pipEl.className = 'card-value ' + (totalPips >= 0 ? 'positive' : 'negative');
-
-  document.getElementById('total-yen').textContent = now.getFullYear() + '年合計 ¥' + totalYen.toLocaleString();
+  document.getElementById('total-year').textContent = now.getFullYear() + '年合計';
 
   const wrEl = document.getElementById('win-rate');
   wrEl.textContent = winRate !== null ? winRate + '%' : '—';
   wrEl.className = 'card-value ' + (winRate >= 50 ? 'positive' : winRate < 50 ? 'negative' : 'neutral');
-
   document.getElementById('win-loss').textContent = wins + '勝 ' + losses + '敗';
 
   const mpEl = document.getElementById('month-pips');
@@ -903,7 +841,6 @@ function render() {
   document.getElementById('rule-fill').style.width = (rulePct || 0) + '%';
   document.getElementById('rule-pct').textContent = rulePct !== null ? rulePct + '%' : '—';
 
-  // Trade list
   const listEl = document.getElementById('trade-list');
   if (trades.length === 0) {
     listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">まだ記録がありません。<br>記録タブから追加してください。</div></div>`;
