@@ -18,7 +18,6 @@
   --accent2: #2b7ac8;
   --green: #2a7a4b;
   --red: #c8392b;
-  --gold: #b8960a;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -218,7 +217,6 @@ body {
 .trade-info { flex: 1; min-width: 0; }
 .trade-pair { font-size: 13px; font-weight: 700; }
 .trade-date { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
 .trade-rule { font-size: 10px; margin-top: 3px; }
 .trade-rule.ok { color: var(--green); }
 .trade-rule.ng { color: var(--red); }
@@ -329,6 +327,46 @@ body {
 .sign-btn.sign-plus-active { background: rgba(42,122,75,0.1); border-color: var(--green); color: var(--green); font-weight: 700; }
 .sign-btn.sign-minus-active { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
 
+/* ロットステッパー */
+.stepper-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stepper-btn {
+  flex: 0 0 48px;
+  background: var(--surface2);
+  border: none;
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.stepper-btn:active { background: var(--border); }
+
+.stepper-input {
+  flex: 1;
+  padding: 10px 4px;
+  background: var(--surface2);
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  outline: none;
+}
+
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -411,8 +449,10 @@ body {
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  cursor: pointer;
 }
+
+/* バナーを下に下げるラッパー */
+.banner-spacer { margin-top: 250px; }
 
 .rules-card {
   background: var(--surface);
@@ -423,9 +463,7 @@ body {
 }
 
 .rules-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-
 .rules-list li { display: flex; gap: 10px; font-size: 12px; line-height: 1.5; color: var(--text); }
-
 .rule-num { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
 
 .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
@@ -544,9 +582,7 @@ body {
           <option value="AUDJPY">AUD/JPY</option>
         </optgroup>
         <optgroup label="その他">
-          <option value="GBPAUD">GBP/AUD</option>
           <option value="OTHER">その他</option>
-          
         </optgroup>
       </select>
     </div>
@@ -561,7 +597,11 @@ body {
 
     <div class="form-group">
       <label class="form-label">LOTS</label>
-      <input type="number" class="form-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
+      <div class="stepper-row">
+        <button class="stepper-btn" onclick="stepLots(-1)">▼</button>
+        <input type="number" class="stepper-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
+        <button class="stepper-btn" onclick="stepLots(1)">▲</button>
+      </div>
     </div>
 
     <div class="form-group">
@@ -614,11 +654,13 @@ body {
     </table>
   </div>
 
-  <div class="rakutore-banner">
-    <div class="banner-tag">// RAKUTORE ANCHOR</div>
-    <div class="banner-title">余計なことをしないための管理。</div>
-    <div class="banner-desc">エントリーはあなた、その後の管理はEAに任せる。月額¥9,900・14日間トライアルあり。先着20名は永久¥1,000引き。</div>
-    <a class="banner-btn" href="https://rakutore.jp/" target="_blank">14日間無料で試す →</a>
+  <div class="banner-spacer">
+    <div class="rakutore-banner">
+      <div class="banner-tag">// RAKUTORE ANCHOR</div>
+      <div class="banner-title">余計なことをしないための管理。</div>
+      <div class="banner-desc">エントリーはあなた、その後の管理はEAに任せる。月額¥9,900・14日間トライアルあり。先着20名は永久¥1,000引き。</div>
+      <a class="banner-btn" href="https://rakutore.jp/" target="_blank">14日間無料で試す →</a>
+    </div>
   </div>
 </div>
 
@@ -636,11 +678,13 @@ body {
     <button class="submit-btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="hideRuleEditor()">キャンセル</button>
   </div>
 
-  <div class="rakutore-banner">
-    <div class="banner-tag">// RAKUTORE ANCHOR</div>
-    <div class="banner-title">エントリー後の管理、全部任せませんか？</div>
-    <div class="banner-desc">裁量×自動管理のハイブリッドEA。感情が入りやすい管理部分を静かに整えます。MT4対応。</div>
-    <a class="banner-btn" href="https://rakutore.jp/lp/" target="_blank">詳細を見る →</a>
+  <div class="banner-spacer">
+    <div class="rakutore-banner">
+      <div class="banner-tag">// RAKUTORE ANCHOR</div>
+      <div class="banner-title">エントリー後の管理、全部任せませんか？</div>
+      <div class="banner-desc">裁量×自動管理のハイブリッドEA。感情が入りやすい管理部分を静かに整えます。MT4対応。</div>
+      <a class="banner-btn" href="https://rakutore.jp/lp/" target="_blank">詳細を見る →</a>
+    </div>
   </div>
 </div>
 
@@ -681,6 +725,13 @@ const DEFAULT_RULES = [
 ];
 
 let userRules = JSON.parse(localStorage.getItem('fx_rules') || 'null') || [...DEFAULT_RULES];
+
+function stepLots(dir) {
+  const input = document.getElementById('input-lots');
+  const current = parseFloat(input.value) || 0.01;
+  const next = Math.max(0.01, Math.round((current + dir * 0.01) * 100) / 100);
+  input.value = next.toFixed(2);
+}
 
 function renderRules() {
   const list = document.getElementById('rules-display');
@@ -734,6 +785,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('today-date').textContent =
     today.toLocaleDateString('ja-JP', {month:'short', day:'numeric', weekday:'short'});
   document.getElementById('input-date').value = today.toISOString().split('T')[0];
+
+  // 前回のロット値を復元
+  const lastLots = localStorage.getItem('fx_last_lots');
+  if (lastLots) {
+    document.getElementById('input-lots').value = parseFloat(lastLots).toFixed(2);
+  }
+
   selectSign('+');
   render();
   renderRules();
@@ -785,11 +843,14 @@ function addTrade() {
 
   const pips = selectedSign === '−' ? -Math.abs(pipsRaw) : Math.abs(pipsRaw);
 
+  // ロットを記憶
+  localStorage.setItem('fx_last_lots', lots.toString());
+
   const trade = { id: Date.now(), date, pair, dir: selectedDir, lots, pips, rule: selectedRule, sl: selectedSL, memo };
   trades.unshift(trade);
   localStorage.setItem('fx_trades', JSON.stringify(trades));
 
-  document.getElementById('input-lots').value = '';
+  // リセット（lotsは残す）
   document.getElementById('input-pips').value = '';
   document.getElementById('input-memo').value = '';
   selectedDir = null; selectedRule = null; selectedSL = null;
@@ -832,7 +893,7 @@ function render() {
 
   const wrEl = document.getElementById('win-rate');
   wrEl.textContent = winRate !== null ? winRate + '%' : '—';
-  wrEl.className = 'card-value ' + (winRate >= 50 ? 'positive' : winRate < 50 ? 'negative' : 'neutral');
+  wrEl.className = 'card-value ' + (winRate !== null && winRate >= 50 ? 'positive' : winRate !== null && winRate < 50 ? 'negative' : 'neutral');
   document.getElementById('win-loss').textContent = wins + '勝 ' + losses + '敗';
 
   const mpEl = document.getElementById('month-pips');
