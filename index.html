@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FX Trade Log</title>
-<style>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FWFTQRCDM9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FWFTQRCDM9');
+  </script>
+  <style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;700;900&family=Share+Tech+Mono&display=swap');
 
 :root {
@@ -306,6 +313,18 @@ body {
 .toggle-btn.selected-yes { background: rgba(42,122,75,0.1); border-color: var(--green); color: var(--green); font-weight: 700; }
 .toggle-btn.selected-no { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
 
+/* LOTS + RESULT 横並び */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.form-row-2 .form-group {
+  margin-bottom: 0;
+}
+
 /* pips行 */
 .pips-row { display: flex; gap: 8px; align-items: stretch; }
 
@@ -582,7 +601,6 @@ body {
           <option value="AUDJPY">AUD/JPY</option>
         </optgroup>
         <optgroup label="その他">
-          <option value="GBPAUD">GBP/AUD</option>
           <option value="OTHER">その他</option>
         </optgroup>
       </select>
@@ -596,21 +614,23 @@ body {
       </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">LOTS</label>
-      <div class="stepper-row">
-        <button class="stepper-btn" onclick="stepLots(-1)">▼</button>
-        <input type="number" class="stepper-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
-        <button class="stepper-btn" onclick="stepLots(1)">▲</button>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label">LOTS</label>
+        <div class="stepper-row">
+          <button class="stepper-btn" onclick="stepLots(-1)">▼</button>
+          <input type="number" class="stepper-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
+          <button class="stepper-btn" onclick="stepLots(1)">▲</button>
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label class="form-label">RESULT (pips)</label>
-      <div class="pips-row">
-        <button class="sign-btn" id="btn-plus" onclick="selectSign('+')">＋</button>
-        <button class="sign-btn" id="btn-minus" onclick="selectSign('−')">－</button>
-        <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1">
+      <div class="form-group">
+        <label class="form-label">RESULT (pips)</label>
+        <div class="pips-row">
+          <button class="sign-btn" id="btn-plus" onclick="selectSign('+')">＋</button>
+          <button class="sign-btn" id="btn-minus" onclick="selectSign('−')">－</button>
+          <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1">
+        </div>
       </div>
     </div>
 
