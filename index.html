@@ -343,8 +343,35 @@ body {
   line-height: 1;
 }
 
-.sign-btn.sign-plus-active { background: rgba(42,122,75,0.1); border-color: var(--green); color: var(--green); font-weight: 700; }
-.sign-btn.sign-minus-active { background: rgba(200,57,43,0.1); border-color: var(--red); color: var(--red); font-weight: 700; }
+/* pips符号トグル（1ボタン） */
+.sign-toggle {
+  flex: 0 0 44px;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 20px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.sign-toggle.sign-plus-active {
+  background: rgba(42,122,75,0.1);
+  border-color: var(--green);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.sign-toggle.sign-minus-active {
+  background: rgba(200,57,43,0.1);
+  border-color: var(--red);
+  color: var(--red);
+  font-weight: 700;
+}
 
 /* ロットステッパー */
 .stepper-row {
@@ -609,8 +636,8 @@ body {
           <option value="AUDJPY">AUD/JPY</option>
         </optgroup>
         <optgroup label="その他">
-         <option value="GBPAUD">GBP/AUD/option>
-         <option value="OTHER">その他</option>
+          <option value="GBPAUD">GBP/AUD</option>
+          <option value="OTHER">その他</option>
         </optgroup>
       </select>
     </div>
@@ -636,8 +663,7 @@ body {
       <div class="form-group">
         <label class="form-label">RESULT (pips)</label>
         <div class="pips-row">
-          <button class="sign-btn" id="btn-plus" onclick="selectSign('+')">＋</button>
-          <button class="sign-btn" id="btn-minus" onclick="selectSign('−')">－</button>
+          <button class="sign-toggle" id="btn-sign" onclick="toggleSign()">＋</button>
           <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1">
         </div>
       </div>
@@ -822,9 +848,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input-lots').value = parseFloat(lastLots).toFixed(2);
   }
 
-  selectSign('+');
-  render();
-  renderRules();
+  // 初期サイン設定
+  const btnSign = document.getElementById('btn-sign');
+  if (btnSign) {
+    btnSign.textContent = '＋';
+    btnSign.className = 'sign-toggle sign-plus-active';
+  }
 });
 
 function showPage(name, btn) {
@@ -853,10 +882,11 @@ function selectSL(val) {
   document.getElementById('btn-sl-yes').className = 'toggle-btn' + (val === 'YES' ? ' selected-no' : '');
 }
 
-function selectSign(sign) {
-  selectedSign = sign;
-  document.getElementById('btn-plus').className = 'sign-btn' + (sign === '+' ? ' sign-plus-active' : '');
-  document.getElementById('btn-minus').className = 'sign-btn' + (sign === '−' ? ' sign-minus-active' : '');
+function toggleSign() {
+  selectedSign = selectedSign === '+' ? '−' : '+';
+  const btn = document.getElementById('btn-sign');
+  btn.textContent = selectedSign === '+' ? '＋' : '－';
+  btn.className = 'sign-toggle ' + (selectedSign === '+' ? 'sign-plus-active' : 'sign-minus-active');
 }
 
 function addTrade() {
@@ -886,7 +916,10 @@ function addTrade() {
   selectedDir = null; selectedRule = null; selectedSL = null;
   ['btn-buy','btn-sell','btn-rule-yes','btn-rule-no','btn-sl-no','btn-sl-yes']
     .forEach(id => document.getElementById(id).className = 'toggle-btn');
-  selectSign('+');
+  selectedSign = '+';
+  const btnSign = document.getElementById('btn-sign');
+  btnSign.textContent = '＋';
+  btnSign.className = 'sign-toggle sign-plus-active';
 
   render();
   showToast('✓ 記録しました');
