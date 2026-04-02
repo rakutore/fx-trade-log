@@ -331,18 +331,32 @@ body {
 .form-row-2 .form-input { min-width: 0; }
 
 .sign-btn {
-  flex: 0 0 28px;
+  flex: 0 0 44px;
   padding: 10px 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface2);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 15px;
+  font-size: 18px;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s;
   color: var(--muted);
   line-height: 1;
+}
+
+.sign-btn.sign-plus-active {
+  background: rgba(42,122,75,0.1);
+  border-color: var(--green);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.sign-btn.sign-minus-active {
+  background: rgba(200,57,43,0.1);
+  border-color: var(--red);
+  color: var(--red);
+  font-weight: 700;
 }
 
 /* pips符号トグル（1ボタン） */
@@ -558,31 +572,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}/* ===== 小さいスマホ専用：強制修正 ===== */
-@media (max-width: 420px) {
-
-  /* 横並びをやめる */
-  .form-row-2 {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* RESULTを縦並びに */
-  .pips-row {
-    flex-direction: column !important;
-    width: 100%;
-  }
-
-  /* ボタンと入力をフル幅に */
-  .sign-toggle {
-    width: 100%;
-  }
-
-  #input-pips {
-    width: 100%;
-  }
-
 }
-    
 </style>
 </head>
 <body>
@@ -676,22 +666,21 @@ body {
       </div>
     </div>
 
-    <div class="form-row-2">
-      <div class="form-group">
-        <label class="form-label">LOTS</label>
-        <div class="stepper-row">
-          <button class="stepper-btn" onclick="stepLots(-1)">▼</button>
-          <input type="number" class="stepper-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
-          <button class="stepper-btn" onclick="stepLots(1)">▲</button>
-        </div>
+    <div class="form-group">
+      <label class="form-label">LOTS</label>
+      <div class="stepper-row">
+        <button class="stepper-btn" onclick="stepLots(-1)">▼</button>
+        <input type="number" class="stepper-input" id="input-lots" placeholder="0.01" step="0.01" min="0.01">
+        <button class="stepper-btn" onclick="stepLots(1)">▲</button>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">RESULT (pips)</label>
-        <div class="pips-row">
-          <button class="sign-toggle" id="btn-sign" onclick="toggleSign()">＋</button>
-          <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1">
-        </div>
+    <div class="form-group">
+      <label class="form-label">RESULT (pips)</label>
+      <div class="pips-row">
+        <button class="sign-btn" id="btn-plus" onclick="selectSign('+')">＋</button>
+        <button class="sign-btn" id="btn-minus" onclick="selectSign('−')">－</button>
+        <input type="number" class="form-input" id="input-pips" placeholder="0.0" step="0.1" min="0" style="flex:1;min-width:0;">
       </div>
     </div>
 
@@ -874,12 +863,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input-lots').value = parseFloat(lastLots).toFixed(2);
   }
 
-  // 初期サイン設定
-  const btnSign = document.getElementById('btn-sign');
-  if (btnSign) {
-    btnSign.textContent = '＋';
-    btnSign.className = 'sign-toggle sign-plus-active';
-  }
+  selectSign('+');
+  render();
+  renderRules();
 });
 
 function showPage(name, btn) {
@@ -908,11 +894,10 @@ function selectSL(val) {
   document.getElementById('btn-sl-yes').className = 'toggle-btn' + (val === 'YES' ? ' selected-no' : '');
 }
 
-function toggleSign() {
-  selectedSign = selectedSign === '+' ? '−' : '+';
-  const btn = document.getElementById('btn-sign');
-  btn.textContent = selectedSign === '+' ? '＋' : '－';
-  btn.className = 'sign-toggle ' + (selectedSign === '+' ? 'sign-plus-active' : 'sign-minus-active');
+function selectSign(sign) {
+  selectedSign = sign;
+  document.getElementById('btn-plus').className = 'sign-btn' + (sign === '+' ? ' sign-plus-active' : '');
+  document.getElementById('btn-minus').className = 'sign-btn' + (sign === '−' ? ' sign-minus-active' : '');
 }
 
 function addTrade() {
@@ -942,10 +927,7 @@ function addTrade() {
   selectedDir = null; selectedRule = null; selectedSL = null;
   ['btn-buy','btn-sell','btn-rule-yes','btn-rule-no','btn-sl-no','btn-sl-yes']
     .forEach(id => document.getElementById(id).className = 'toggle-btn');
-  selectedSign = '+';
-  const btnSign = document.getElementById('btn-sign');
-  btnSign.textContent = '＋';
-  btnSign.className = 'sign-toggle sign-plus-active';
+  selectSign('+');
 
   render();
   showToast('✓ 記録しました');
