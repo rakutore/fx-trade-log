@@ -275,6 +275,7 @@ body {
   padding: 20px;
   border: 1px solid var(--border);
   margin-bottom: 16px;
+  overflow: hidden;
 }
 
 .form-title {
@@ -311,7 +312,7 @@ body {
   border-color: var(--text);
 }
 
-.form-textarea { resize: none; height: 70px; }
+.form-textarea { resize: none; height: 52px; }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -605,7 +606,7 @@ body {
 
     <div class="form-group">
       <label class="form-label">DATE</label>
-      <input type="date" class="form-input" id="input-date">
+      <input type="date" class="form-input" id="input-date" style="max-width:100%;box-sizing:border-box">
     </div>
 
     <div class="form-group">
@@ -624,10 +625,9 @@ body {
           <option value="EURJPY">EUR/JPY</option>
           <option value="GBPJPY">GBP/JPY</option>
           <option value="AUDJPY">AUD/JPY</option>
-          
+          <option value="GBPAUD">GBP/AUD</option>
         </optgroup>
         <optgroup label="その他">
-          <option value="GBPAUD">GBP/AUD</option>
           <option value="OTHER">その他</option>
         </optgroup>
       </select>
