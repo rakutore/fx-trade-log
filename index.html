@@ -316,7 +316,7 @@ body {
 /* LOTS + RESULT 横並び */
 .form-row-2 {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -329,13 +329,13 @@ body {
 .pips-row { display: flex; gap: 8px; align-items: stretch; }
 
 .sign-btn {
-  flex: 0 0 36px;
+  flex: 0 0 28px;
   padding: 10px 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface2);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 18px;
+  font-size: 15px;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s;
@@ -356,10 +356,10 @@ body {
 }
 
 .stepper-btn {
-  flex: 0 0 48px;
+  flex: 0 0 26px;
   background: var(--surface2);
   border: none;
-  font-size: 18px;
+  font-size: 11px;
   color: var(--muted);
   cursor: pointer;
   transition: background 0.15s;
@@ -373,17 +373,25 @@ body {
 
 .stepper-input {
   flex: 1;
-  padding: 10px 4px;
+  padding: 10px 2px;
   background: var(--surface2);
   border: none;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
   text-align: center;
   outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-inner-spin-button,
+.stepper-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .submit-btn {
@@ -601,8 +609,8 @@ body {
           <option value="AUDJPY">AUD/JPY</option>
         </optgroup>
         <optgroup label="その他">
-          <option value="GBPAUD>GBP/AUD</option>
-          <option value="OTHER">その他</option>
+         <option value="GBPAUD">GBP/AUD/option>
+         <option value="OTHER">その他</option>
         </optgroup>
       </select>
     </div>
