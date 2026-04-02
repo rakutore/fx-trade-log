@@ -556,6 +556,34 @@ body {
   align-items: center;
   justify-content: center;
 }
+    /* ===== レイアウト崩れ修正 ===== */
+
+/* 幅バランス調整 */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 8px;
+}
+
+/* RESULTのはみ出し防止 */
+.pips-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+}
+
+/* inputがはみ出さないように */
+#input-pips {
+  min-width: 0;
+  width: 100%;
+}
+
+/* LOTS側も縮められるように */
+.stepper-row {
+  width: 100%;
+  min-width: 0;
+}
 </style>
 </head>
 <body>
