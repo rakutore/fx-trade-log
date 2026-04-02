@@ -558,7 +558,31 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}/* ===== 小さいスマホ専用：強制修正 ===== */
+@media (max-width: 420px) {
+
+  /* 横並びをやめる */
+  .form-row-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* RESULTを縦並びに */
+  .pips-row {
+    flex-direction: column !important;
+    width: 100%;
+  }
+
+  /* ボタンと入力をフル幅に */
+  .sign-toggle {
+    width: 100%;
+  }
+
+  #input-pips {
+    width: 100%;
+  }
+
 }
+    
 </style>
 </head>
 <body>
