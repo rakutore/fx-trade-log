@@ -266,6 +266,18 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: all 0.3s;
+}
+.trade-memo.expanded {
+  white-space: normal;
+  text-overflow: unset;
+  max-width: 100%;
+  text-align: left;
+  background: var(--surface2);
+  padding: 6px 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
 }
 
 /* Add form */
