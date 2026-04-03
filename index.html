@@ -625,8 +625,7 @@ body {
           <option value="EURJPY">EUR/JPY</option>
           <option value="GBPJPY">GBP/JPY</option>
           <option value="AUDJPY">AUD/JPY</option>
-          <option value="GBPAUD">GBP/AUD</option>
-        </optgroup>
+              </optgroup>
         <optgroup label="その他">
           <option value="GBPAUD">GBP/AUD</option>
           <option value="OTHER">その他</option>
@@ -721,7 +720,7 @@ body {
 </div>
 
 <!-- 固定バナー（ナビ直上） -->
-<div id="fixed-banner" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:99;padding:0 16px;box-sizing:border-box">
+<div id="fixed-banner" style="display:none;position:fixed;bottom:68px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:99;padding:0 16px;box-sizing:border-box">
   <div class="rakutore-banner" style="margin-bottom:0;border-radius:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div>
@@ -876,8 +875,9 @@ function showPage(name, btn) {
   document.getElementById('page-' + name).classList.add('active');
   btn.classList.add('active');
   if (name === 'monthly') renderMonthly();
-  // バナーはホーム以外で表示
-  document.getElementById('fixed-banner').style.display = name === 'home' ? 'none' : 'block';
+  // バナーはルールと月次のみ表示
+  const showBanner = (name === 'monthly' || name === 'rules');
+  document.getElementById('fixed-banner').style.display = showBanner ? 'block' : 'none';
 }
 
 function selectDir(dir) {
