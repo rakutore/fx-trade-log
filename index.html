@@ -1019,7 +1019,7 @@ function render() {
       </div>
       <div>
         <div class="trade-pips ${t.pips >= 0 ? 'pos' : 'neg'}">${t.pips >= 0 ? '+' : ''}${t.pips.toFixed(1)}</div>
-        <div class="trade-memo">${t.memo || ''}</div>
+        <div class="trade-memo" onclick="this.classList.toggle('expanded')" style="cursor:pointer">${t.memo || ''}</div>
       </div>
       <button class="delete-btn" onclick="deleteTrade(${t.id})">×</button>
     </div>
