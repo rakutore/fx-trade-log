@@ -889,8 +889,10 @@ function showPage(name, btn) {
   btn.classList.add('active');
   if (name === 'monthly') renderMonthly();
   // バナーはルールと月次のみ表示
-  const showBanner = (name === 'monthly' || name === 'rules');
-  document.getElementById('fixed-banner').style.display = showBanner ? 'block' : 'none';
+ document.getElementById('banner-monthly').style.display = name === 'monthly' ? 'block' : 'none';
+document.getElementById('banner-rules').style.display = name === 'rules' ? 'block' : 'none';
+const showBanner = (name === 'monthly' || name === 'rules');
+document.getElementById('fixed-banner').style.display = showBanner ? 'block' : 'none';
 }
 
 function selectDir(dir) {
