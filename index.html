@@ -166,7 +166,7 @@ body {
 .rule-bar {
   background: var(--surface);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 14px 16px 16px;
   border: 1px solid var(--border);
   margin-bottom: 20px;
 }
@@ -625,10 +625,10 @@ body {
           <option value="EURJPY">EUR/JPY</option>
           <option value="GBPJPY">GBP/JPY</option>
           <option value="AUDJPY">AUD/JPY</option>
-         
+          <option value="GBPAUD">GBP/AUD</option>
         </optgroup>
         <optgroup label="その他">
-           <option value="GBPAUD">GBP/AUD</option>
+          <option value="GBPAUD">GBP/AUD</option>
           <option value="OTHER">その他</option>
         </optgroup>
       </select>
@@ -681,7 +681,7 @@ body {
 
     <div class="form-group">
       <label class="form-label">MEMO</label>
-      <textarea class="form-textarea" id="input-memo" placeholder="反省・気づきなど（任意）"></textarea>
+      <textarea class="form-textarea" id="input-memo" placeholder="反省・気づきなど（任意）" style="width:100%;max-width:100%;box-sizing:border-box"></textarea>
     </div>
 
     <button class="submit-btn" onclick="addTrade()">記録する</button>
@@ -703,13 +703,6 @@ body {
       <tbody id="monthly-tbody"></tbody>
     </table>
   </div>
-
-  <div class="rakutore-banner">
-    <div class="banner-tag">// RAKUTORE ANCHOR</div>
-    <div class="banner-title">余計なことをしないための管理。</div>
-    <div class="banner-desc">エントリーはあなた、その後の管理はEAに任せる。月額¥9,900・14日間トライアルあり。先着20名は永久¥1,000引き。</div>
-    <a class="banner-btn" href="https://rakutore.jp/" target="_blank">14日間無料で試す →</a>
-  </div>
 </div>
 
 <div class="page" id="page-rules">
@@ -725,12 +718,18 @@ body {
     <button class="submit-btn" style="margin-bottom:10px" onclick="saveRules()">保存する</button>
     <button class="submit-btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="hideRuleEditor()">キャンセル</button>
   </div>
+</div>
 
-  <div class="rakutore-banner">
-    <div class="banner-tag">// RAKUTORE ANCHOR</div>
-    <div class="banner-title">エントリー後の管理、全部任せませんか？</div>
-    <div class="banner-desc">裁量×自動管理のハイブリッドEA。感情が入りやすい管理部分を静かに整えます。MT4対応。</div>
-    <a class="banner-btn" href="https://rakutore.jp/lp/" target="_blank">詳細を見る →</a>
+<!-- 固定バナー（ナビ直上） -->
+<div id="fixed-banner" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:99;padding:0 16px;box-sizing:border-box">
+  <div class="rakutore-banner" style="margin-bottom:0;border-radius:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <div class="banner-tag" style="margin-bottom:4px">// RAKUTORE ANCHOR</div>
+        <div class="banner-title" style="font-size:13px;margin-bottom:0">余計なことをしないための管理。</div>
+      </div>
+      <a class="banner-btn" href="https://rakutore.jp/lp/" target="_blank" style="white-space:nowrap;font-size:11px;padding:8px 12px;flex-shrink:0">無料で試す →</a>
+    </div>
   </div>
 </div>
 
@@ -817,9 +816,9 @@ function renderRules() {
 function showRuleEditor() {
   const container = document.getElementById('rule-inputs');
   container.innerHTML = userRules.map((r, i) => `
-    <div class="form-group">
-      <label class="form-label">ルール ${i+1}</label>
-      <input type="text" class="form-input rule-input" value="${r}" placeholder="ルールを入力">
+    <div class="form-group" style="display:flex;gap:8px;align-items:center">
+      <input type="text" class="form-input rule-input" value="${r}" placeholder="ルールを入力" style="flex:1">
+      <button type="button" onclick="removeRuleInput(this)" style="width:36px;height:42px;border:1px solid var(--border);border-radius:8px;background:rgba(200,57,43,0.1);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0">×</button>
     </div>
   `).join('') + `
     <button class="submit-btn" style="margin-bottom:10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)" onclick="addRuleInput()">＋ ルールを追加</button>
@@ -828,14 +827,18 @@ function showRuleEditor() {
   document.querySelector('.rules-card').style.display = 'none';
 }
 
+function removeRuleInput(btn) {
+  btn.parentElement.remove();
+}
+
 function addRuleInput() {
   const container = document.getElementById('rule-inputs');
   const newItem = document.createElement('div');
   newItem.className = 'form-group';
-  const num = container.querySelectorAll('.rule-input').length + 1;
+  newItem.style.cssText = 'display:flex;gap:8px;align-items:center';
   newItem.innerHTML = `
-    <label class="form-label">ルール ${num}</label>
-    <input type="text" class="form-input rule-input" placeholder="ルールを入力">
+    <input type="text" class="form-input rule-input" placeholder="ルールを入力" style="flex:1">
+    <button type="button" onclick="removeRuleInput(this)" style="width:36px;height:42px;border:1px solid var(--border);border-radius:8px;background:rgba(200,57,43,0.1);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0">×</button>
   `;
   container.insertBefore(newItem, container.lastElementChild);
 }
@@ -873,6 +876,8 @@ function showPage(name, btn) {
   document.getElementById('page-' + name).classList.add('active');
   btn.classList.add('active');
   if (name === 'monthly') renderMonthly();
+  // バナーはホーム以外で表示
+  document.getElementById('fixed-banner').style.display = name === 'home' ? 'none' : 'block';
 }
 
 function selectDir(dir) {
