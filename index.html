@@ -270,6 +270,7 @@ body {
   cursor: pointer;
   transition: all 0.3s;
 }
+
 .trade-memo.expanded {
   white-space: normal;
   text-overflow: unset;
@@ -283,6 +284,9 @@ body {
   order: 10;
   word-break: break-all;
   overflow-wrap: break-word;
+  box-sizing: border-box;
+  margin-right: 8px;
+  width: calc(100% - 8px);
 }
 }
 
