@@ -118,7 +118,14 @@ body {
 .nav-btn .nav-icon { font-size: 18px; }
 
 /* Pages */
-.page { display: none; padding: 20px 16px 160px; }
+:root {
+  --bottom-space: 180px; /* JSで上書きされる */
+}
+
+.page { 
+  display: none; 
+  padding: 20px 16px var(--bottom-space);
+}
 .page.active { display: block; }
 
 /* Summary cards */
@@ -895,6 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lastLots) document.getElementById('input-lots').value = lastLots;
   render();
   renderRules();
+  updateBottomSpace();
 });
 
 function showPage(name, btn) {
@@ -908,6 +916,7 @@ function showPage(name, btn) {
 document.getElementById('banner-rules').style.display = name === 'rules' ? 'block' : 'none';
 const showBanner = (name === 'monthly' || name === 'rules');
 document.getElementById('fixed-banner').style.display = showBanner ? 'block' : 'none';
+  setTimeout(updateBottomSpace, 50); // ←これ追加
 }
 
 function selectDir(dir) {
@@ -1086,6 +1095,19 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+  function updateBottomSpace() {
+  const nav = document.querySelector('.bottom-nav');
+  const banner = document.getElementById('fixed-banner');
+
+  const navH = nav ? nav.offsetHeight : 0;
+  const bannerH = (banner && banner.style.display !== 'none') ? banner.offsetHeight : 0;
+
+  const extra = 20; // ←余白（ここで調整できる）
+
+  const total = navH + bannerH + extra;
+
+  document.documentElement.style.setProperty('--bottom-space', total + 'px');
 }
 </script>
 </body>
