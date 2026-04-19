@@ -575,6 +575,74 @@ body {
   padding: 4px;
   flex-shrink: 0;
 }
+  /* Screenshot */
+.img-attach-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--muted);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+}
+.img-preview-wrap {
+  position: relative;
+  margin-top: 8px;
+}
+.img-preview-wrap img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+.img-remove-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 26px; height: 26px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.trade-thumb {
+  width: 100%;
+  border-radius: 6px;
+  margin-top: 6px;
+  cursor: pointer;
+  display: block;
+}
+/* Modal */
+.img-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.img-modal.open { display: flex; }
+.img-modal img {
+  max-width: 94vw;
+  max-height: 88vh;
+  border-radius: 8px;
+}
+.img-modal-close {
+  position: fixed;
+  top: 16px; right: 16px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -711,7 +779,17 @@ body {
       <label class="form-label">MEMO</label>
       <textarea class="form-textarea" id="input-memo" placeholder="反省・気づきなど（任意）" style="width:100%;max-width:100%;box-sizing:border-box"></textarea>
     </div>
-
+<div class="form-group">
+  <label class="form-label">SCREENSHOT（任意）</label>
+  <input type="file" accept="image/*" id="input-image" style="display:none" onchange="handleImageSelect(this)">
+  <button type="button" class="img-attach-btn" id="img-attach-btn" onclick="document.getElementById('input-image').click()">
+    📷 スクショを添付する
+  </button>
+  <div class="img-preview-wrap" id="img-preview-wrap" style="display:none">
+    <img id="img-preview" src="">
+    <button class="img-remove-btn" onclick="removeImage()">✕</button>
+  </div>
+</div>
     <button class="submit-btn" onclick="addTrade()">記録する</button>
   </div>
 </div>
@@ -786,11 +864,44 @@ body {
     <span>ルール</span>
   </button>
 </nav>
-
+<div class="img-modal" id="img-modal" onclick="closeModal()">
+  <button class="img-modal-close" onclick="closeModal()">✕</button>
+  <img id="modal-img" src="">
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
-// State
+// IndexedDB
+let db;
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('fx_trade_images', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('images');
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror = reject;
+  });
+}
+function saveImage(id, blob) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('images', 'readwrite');
+    tx.objectStore('images').put(blob, id);
+    tx.oncomplete = resolve;
+    tx.onerror = reject;
+  });
+}
+function getImage(id) {
+  return new Promise(resolve => {
+    const tx = db.transaction('images', 'readonly');
+    const req = tx.objectStore('images').get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
+  });
+}
+function deleteImage(id) {
+  if (!db) return;
+  db.transaction('images', 'readwrite').objectStore('images').delete(id);
+}
+  // State
 let trades = JSON.parse(localStorage.getItem('fx_trades') || '[]');
 let selectedDir = null;
 let selectedRule = null;
