@@ -1085,7 +1085,7 @@ function selectSL(val) {
   document.getElementById('btn-sl-yes').className = 'toggle-btn' + (val === 'YES' ? ' selected-no' : '');
 }
 
-function addTrade() {
+async function addTrade() {
   const date = document.getElementById('input-date').value;
   const pair = document.getElementById('input-pair').value;
   const lots = parseFloat(document.getElementById('input-lots').value);
@@ -1111,6 +1111,9 @@ function addTrade() {
 
   localStorage.setItem('fx_last_lots', lots);
   trades.unshift(trade);
+  if (selectedImageFile) {
+    await saveImage(trade.id, selectedImageFile);
+  }
   localStorage.setItem('fx_trades', JSON.stringify(trades));
 
   // Reset form
@@ -1126,6 +1129,7 @@ function addTrade() {
   btn.style.color = 'var(--red)';
   btn.style.borderColor = 'var(--border)';
   selectedDir = null; selectedRule = null; selectedSL = null;
+  removeImage();
   ['btn-buy','btn-sell','btn-rule-yes','btn-rule-no','btn-sl-no','btn-sl-yes']
     .forEach(id => document.getElementById(id).className = 'toggle-btn');
 
@@ -1135,6 +1139,8 @@ function addTrade() {
 }
 
 function deleteTrade(id) {
+  if (!confirm('削除しますか？')) return;  // ← 誤削除防止（任意）
+  deleteImage(id);  // ← 追加
   trades = trades.filter(t => t.id !== id);
   localStorage.setItem('fx_trades', JSON.stringify(trades));
   render();
@@ -1200,9 +1206,13 @@ function render() {
         <div class="trade-pips ${t.pips >= 0 ? 'pos' : 'neg'}">${t.pips >= 0 ? '+' : ''}${t.pips.toFixed(1)}</div>
         <div class="trade-memo" onclick="this.classList.toggle('expanded')" style="cursor:pointer">${t.memo || ''}</div>
       </div>
+      <div class="trade-thumb-wrap" id="thumb-${t.id}" style="width:100%;display:none">
+        <img class="trade-thumb" src="" onclick="openModal(${t.id})">
+      </div>
       <button class="delete-btn" onclick="deleteTrade(${t.id})">×</button>
     </div>
   `).join('');
+  loadThumbnails();   ← ここに追加
 }
 
 function renderMonthly() {
@@ -1243,6 +1253,17 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+  async function loadThumbnails() {
+  for (const t of trades.slice(0, 20)) {
+    const blob = await getImage(t.id);
+    if (!blob) continue;
+    const wrap = document.getElementById('thumb-' + t.id);
+    if (!wrap) continue;
+    const img = wrap.querySelector('img');
+    img.src = URL.createObjectURL(blob);
+    wrap.style.display = 'block';
+  }
 }
   function updateBottomSpace() {
   const nav = document.querySelector('.bottom-nav');
