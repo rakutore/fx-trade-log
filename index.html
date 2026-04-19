@@ -908,6 +908,42 @@ let selectedRule = null;
 let selectedSL = null;
 let pipsSign = -1; // デフォルトはマイナス
 
+  let selectedImageFile = null;
+
+function handleImageSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  selectedImageFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('img-preview').src = e.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+    document.getElementById('img-attach-btn').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  selectedImageFile = null;
+  document.getElementById('input-image').value = '';
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('img-attach-btn').style.display = 'block';
+}
+
+function openModal(id) {
+  getImage(id).then(blob => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    document.getElementById('modal-img').src = url;
+    document.getElementById('img-modal').classList.add('open');
+  });
+}
+
+function closeModal() {
+  const modal = document.getElementById('img-modal');
+  modal.classList.remove('open');
+  URL.revokeObjectURL(document.getElementById('modal-img').src);
+}
 function adjustVal(id, delta, decimals) {
   const el = document.getElementById(id);
   const current = parseFloat(el.value) || 0;
