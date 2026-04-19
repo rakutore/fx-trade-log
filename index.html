@@ -892,7 +892,8 @@ function hideRuleEditor() {
 }
 
 // Init
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',async () => {
+  await initDB();  // ← 追加
   const today = new Date();
   document.getElementById('today-date').textContent =
     today.toLocaleDateString('ja-JP', {month:'short', day:'numeric', weekday:'short'});
