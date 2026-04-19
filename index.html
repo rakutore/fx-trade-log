@@ -6,6 +6,10 @@
 <title>FX Trade Log</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FWFTQRCDM9"></script>
 <script>
+const params = new URLSearchParams(location.search);
+const IS_PRIVATE = params.get('private') === '1';
+
+const STORAGE_KEY = IS_PRIVATE ? 'fx_trades_private' : 'fx_trades';
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -575,6 +579,14 @@ body {
   padding: 4px;
   flex-shrink: 0;
 }
+  .trade-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-top: 6px;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -711,7 +723,11 @@ body {
       <label class="form-label">MEMO</label>
       <textarea class="form-textarea" id="input-memo" placeholder="反省・気づきなど（任意）" style="width:100%;max-width:100%;box-sizing:border-box"></textarea>
     </div>
-
+　　<div id="private-image-area" style="display:none;margin-top:10px">
+  <label class="form-label">SCREENSHOT</label>
+  <input type="file" id="input-image" accept="image/*">
+</div>
+    
     <button class="submit-btn" onclick="addTrade()">記録する</button>
   </div>
 </div>
@@ -791,11 +807,12 @@ body {
 
 <script>
 // State
-let trades = JSON.parse(localStorage.getItem('fx_trades') || '[]');
+let trades = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let selectedDir = null;
 let selectedRule = null;
 let selectedSL = null;
 let pipsSign = -1; // デフォルトはマイナス
+let imageBase64 = null;
 
 function adjustVal(id, delta, decimals) {
   const el = document.getElementById(id);
@@ -903,6 +920,9 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
   renderRules();
   updateBottomSpace();
+  if (IS_PRIVATE) {
+  document.getElementById('private-image-area').style.display = 'block';
+}
 });
 
 function showPage(name, btn) {
@@ -959,11 +979,12 @@ function addTrade() {
     rule: selectedRule,
     sl: selectedSL,
     memo
+    image: IS_PRIVATE ? imageBase64 : null,
   };
 
   localStorage.setItem('fx_last_lots', lots);
   trades.unshift(trade);
-  localStorage.setItem('fx_trades', JSON.stringify(trades));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
 
   // Reset form
   const lastLots = localStorage.getItem('fx_last_lots');
@@ -1050,6 +1071,7 @@ function render() {
       </div>
       <div>
         <div class="trade-pips ${t.pips >= 0 ? 'pos' : 'neg'}">${t.pips >= 0 ? '+' : ''}${t.pips.toFixed(1)}</div>
+        ${t.image ? `<img src="${t.image}" class="trade-img">` : ''}
         <div class="trade-memo" onclick="this.classList.toggle('expanded')" style="cursor:pointer">${t.memo || ''}</div>
       </div>
       <button class="delete-btn" onclick="deleteTrade(${t.id})">×</button>
@@ -1109,6 +1131,56 @@ function showToast(msg) {
 
   document.documentElement.style.setProperty('--bottom-space', total + 'px');
 }
+  document.getElementById('input-image')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(ev) {
+    const img = new Image();
+
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const maxW = 600;
+      const scale = maxW / img.width;
+
+      canvas.width = maxW;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      imageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+    };
+
+    img.src = ev.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
+  document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('trade-img')) {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = 0;
+    modal.style.left = 0;
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.background = 'rgba(0,0,0,0.9)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = 999;
+
+    modal.innerHTML = `<img src="${e.target.src}" style="max-width:90%;max-height:90%">`;
+
+    modal.onclick = () => modal.remove();
+
+    document.body.appendChild(modal);
+  }
+});
 </script>
 </body>
 </html>
