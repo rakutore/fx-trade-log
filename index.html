@@ -1194,7 +1194,9 @@ function render() {
     return;
   }
 
-  listEl.innerHTML = trades.slice(0, 20).map(t => `
+ let displayCount = parseInt(listEl.dataset.count || '20');
+  
+  listEl.innerHTML = trades.slice(0, displayCount).map(t => `
     <div class="trade-item">
       <div class="trade-dir ${t.dir.toLowerCase()}">${t.dir}</div>
       <div class="trade-info">
@@ -1212,7 +1214,20 @@ function render() {
       <button class="delete-btn" onclick="deleteTrade(${t.id})">×</button>
     </div>
   `).join('');
-  loadThumbnails();  // ← ここに追加
+
+  if (trades.length > displayCount) {
+    const moreBtn = document.createElement('button');
+    moreBtn.className = 'submit-btn';
+    moreBtn.style.cssText = 'background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:4px';
+    moreBtn.textContent = `もっと見る（残り${trades.length - displayCount}件）`;
+    moreBtn.onclick = () => {
+      listEl.dataset.count = displayCount + 20;
+      render();
+    };
+    listEl.appendChild(moreBtn);
+  }
+
+  loadThumbnails();
 }
 
 function renderMonthly() {
