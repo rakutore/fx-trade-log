@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FX MONEY LOG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-sub: #888;
+    --green: #2a7a4b;
+    --red: #c0392b;
+    --border: #e0dbd3;
+    --accent: #1a1a1a;
+    --header-bg: #1a1a1a;
+    --header-text: #ffffff;
+    --nav-bg: #1a1a1a;
+    --nav-text: #ffffff;
+    --nav-active: #4ade80;
+    --today-bg: #1a1a1a;
+    --today-text: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 70px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 14px 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .header-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .header-sub {
+    font-size: 10px;
+    color: #aaa;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .header-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  /* PAGES */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+  }
+  .card-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .card-value.pos { color: var(--green); }
+  .card-value.neg { color: var(--red); }
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 6px;
+  }
+  .cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .cards-row .card { margin-bottom: 0; }
+  .cards-row .card-value { font-size: 22px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent);
+  }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-sub);
+    font-size: 12px;
+  }
+
+  /* AMOUNT INPUT with +/- */
+  .amount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .amount-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .amount-row .form-input {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+  }
+
+  /* SUBMIT BUTTON */
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn-submit:active { opacity: 0.8; }
+
+  /* TRADE LIST */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+  }
+  .trade-item {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 13px 15px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .trade-pair {
+    background: var(--accent);
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .trade-info { flex: 1; }
+  .trade-date { font-size: 11px; color: var(--text-sub); }
+  .trade-memo { font-size: 12px; color: var(--text); margin-top: 1px; }
+  .trade-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .trade-amount.pos { color: var(--green); }
+  .trade-amount.neg { color: var(--red); }
+  .trade-delete {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  /* CALENDAR */
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+  }
+  .cal-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .cal-monthly-total {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .cal-monthly-total.pos { color: var(--green); }
+  .cal-monthly-total.neg { color: var(--red); }
+  .cal-monthly-sub {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .cal-grid {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .cal-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr) 80px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-header-cell {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    color: var(--text-sub);
+    text-align: center;
+    padding: 8px 2px;
+  }
+  .cal-header-cell.week-col { color: var(--text-sub); font-size: 8px; }
+  .cal-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr) 80px;
+    border-bottom: 1px solid var(--border);
+    min-height: 52px;
+  }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-cell {
+    padding: 5px 4px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 52px;
+  }
+  .cal-cell:last-child { border-right: none; }
+  .cal-day {
+    font-size: 10px;
+    color: var(--text-sub);
+    line-height: 1.4;
+  }
+  .cal-cell.today .cal-day {
+    background: var(--today-bg);
+    color: var(--today-text);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+  .cal-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    margin-top: 3px;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .cal-amount.pos { color: var(--green); }
+  .cal-amount.neg { color: var(--red); }
+  .cal-week-cell {
+    padding: 5px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    background: #f7f4f0;
+    min-height: 52px;
+  }
+  .cal-week-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    color: var(--text-sub);
+    letter-spacing: 0.05em;
+  }
+  .cal-week-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .cal-week-amount.pos { color: var(--green); }
+  .cal-week-amount.neg { color: var(--red); }
+
+  /* PAIR SUMMARY */
+  .pair-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pair-row:last-child { border-bottom: none; }
+  .pair-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .pair-stats { font-size: 11px; color: var(--text-sub); }
+  .pair-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .pair-amount.pos { color: var(--green); }
+  .pair-amount.neg { color: var(--red); }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--nav-bg);
+    display: flex;
+    border-top: 1px solid #333;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 8px;
+    cursor: pointer;
+    color: #666;
+    border: none;
+    background: none;
+  }
+  .nav-item.active { color: var(--nav-active); }
+  .nav-icon { font-size: 20px; line-height: 1; }
+  .nav-label {
+    font-size: 9px;
+    margin-top: 3px;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a1a1a;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 12px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .empty-msg {
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    padding: 30px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">FX MONEY LOG</div>
+    <div class="header-sub">円損益トラッカー</div>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="card" style="margin-top:4px;">
+    <div class="card-label">TOTAL THIS YEAR</div>
+    <div class="card-value" id="homeTotal">¥0</div>
+    <div class="card-sub" id="homeYearSub">2026年合計</div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-label">THIS MONTH</div>
+      <div class="card-value" id="homeMonth" style="font-size:20px;">¥0</div>
+      <div class="card-sub" id="homeMonthSub">0トレード</div>
+    </div>
+    <div class="card">
+      <div class="card-label">WIN RATE</div>
+      <div class="card-value" id="homeWin" style="font-size:20px;">0%</div>
+      <div class="card-sub" id="homeWinSub">0勝 0敗</div>
+    </div>
+  </div>
+
+  <div class="section-label">RECENT TRADES</div>
+  <div id="recentList"></div>
+</div>
+
+<!-- ENTRY PAGE -->
+<div class="page" id="page-entry">
+  <div class="card" style="margin-top:4px;">
+    <div class="card-label" style="margin-bottom:14px;">NEW TRADE</div>
+
+    <div class="form-group">
+      <label class="form-label">DATE</label>
+      <input type="date" class="form-input" id="entryDate">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">PAIR</label>
+      <div class="select-wrap">
+        <select class="form-select" id="entryPair">
+          <option>GBPJPY</option>
+          <option>XAUUSD</option>
+          <option>USDJPY</option>
+          <option>EURUSD</option>
+          <option>EURJPY</option>
+          <option>OTHER</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">AMOUNT (円)</label>
+      <div class="amount-row">
+        <button class="amount-btn" id="amountMinus">−</button>
+        <input type="number" class="form-input" id="entryAmount" placeholder="0" inputmode="numeric">
+        <button class="amount-btn" id="amountPlus">＋</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">MEMO (任意)</label>
+      <input type="text" class="form-input" id="entryMemo" placeholder="メモ">
+    </div>
+
+    <button class="btn-submit" id="btnSave">SAVE TRADE</button>
+  </div>
+</div>
+
+<!-- CALENDAR PAGE -->
+<div class="page" id="page-cal">
+  <div class="cal-nav" style="margin-top:4px;">
+    <button class="cal-nav-btn" id="calPrev">‹</button>
+    <div class="cal-title" id="calTitle"></div>
+    <button class="cal-nav-btn" id="calNext">›</button>
+  </div>
+
+  <div class="cal-monthly-total" id="calTotal"></div>
+  <div class="cal-monthly-sub" id="calSub"></div>
+
+  <div class="cal-grid">
+    <div class="cal-header-row">
+      <div class="cal-header-cell">日</div>
+      <div class="cal-header-cell">月</div>
+      <div class="cal-header-cell">火</div>
+      <div class="cal-header-cell">水</div>
+      <div class="cal-header-cell">木</div>
+      <div class="cal-header-cell">金</div>
+      <div class="cal-header-cell">土</div>
+      <div class="cal-header-cell week-col">週計</div>
+    </div>
+    <div id="calBody"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label" style="margin-bottom:12px;">PAIR BREAKDOWN</div>
+    <div id="pairBreakdown"></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-item active" data-page="home">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">ホーム</div>
+  </button>
+  <button class="nav-item" data-page="entry">
+    <div class="nav-icon">＋</div>
+    <div class="nav-label">記録</div>
+  </button>
+  <button class="nav-item" data-page="cal">
+    <div class="nav-icon">📅</div>
+    <div class="nav-label">カレンダー</div>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---- DB ----
+let db;
+const DB_NAME = 'moneylog_db';
+const STORE = 'trades';
+
+function initDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) {
+        const s = d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        s.createIndex('date', 'date');
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; res(); };
+    req.onerror = rej;
+  });
+}
+
+function getAllTrades() {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => res(req.result.sort((a,b) => b.date.localeCompare(a.date)));
+    req.onerror = rej;
+  });
+}
+
+function saveTrade(trade) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).add(trade);
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+}
+
+function deleteTrade(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).delete(id);
+    req.onsuccess = res;
+    req.onerror = rej;
+  });
+}
+
+// ---- UTILS ----
+function fmtYen(v) {
+  const abs = Math.abs(v);
+  const s = abs.toLocaleString('ja-JP');
+  return (v >= 0 ? '+¥' : '-¥') + s;
+}
+function colorClass(v) { return v >= 0 ? 'pos' : 'neg'; }
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ---- DATE ----
+const today = new Date();
+document.getElementById('headerDate').textContent =
+  `${today.getMonth()+1}月${today.getDate()}日(${['日','月','火','水','木','金','土'][today.getDay()]})`;
+
+// ---- NAV ----
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    if (btn.dataset.page === 'home') renderHome();
+    if (btn.dataset.page === 'cal') renderCalendar();
+  });
+});
+
+// ---- HOME ----
+async function renderHome() {
+  const trades = await getAllTrades();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const monthStr = `${year}-${String(month).padStart(2,'0')}`;
+
+  const yearTrades = trades.filter(t => t.date.startsWith(String(year)));
+  const monthTrades = trades.filter(t => t.date.startsWith(monthStr));
+  const yearTotal = yearTrades.reduce((s,t) => s+t.amount, 0);
+  const monthTotal = monthTrades.reduce((s,t) => s+t.amount, 0);
+  const wins = yearTrades.filter(t => t.amount > 0).length;
+  const losses = yearTrades.filter(t => t.amount < 0).length;
+  const total = wins + losses;
+  const winRate = total > 0 ? Math.round(wins/total*100) : 0;
+
+  const ht = document.getElementById('homeTotal');
+  ht.textContent = fmtYen(yearTotal);
+  ht.className = 'card-value ' + colorClass(yearTotal);
+
+  const hm = document.getElementById('homeMonth');
+  hm.textContent = fmtYen(monthTotal);
+  hm.className = 'card-value ' + colorClass(monthTotal);
+  document.getElementById('homeMonthSub').textContent = monthTrades.length + 'トレード';
+
+  const hw = document.getElementById('homeWin');
+  hw.textContent = winRate + '%';
+  hw.className = 'card-value ' + colorClass(winRate - 50);
+  document.getElementById('homeWinSub').textContent = `${wins}勝 ${losses}敗`;
+
+  const list = document.getElementById('recentList');
+  const recent = trades.slice(0, 10);
+  if (recent.length === 0) {
+    list.innerHTML = '<div class="empty-msg">まだ記録がありません</div>';
+    return;
+  }
+  list.innerHTML = recent.map(t => `
+    <div class="trade-item">
+      <div class="trade-pair">${t.pair}</div>
+      <div class="trade-info">
+        <div class="trade-date">${t.date}</div>
+        ${t.memo ? `<div class="trade-memo">${t.memo}</div>` : ''}
+      </div>
+      <div class="trade-amount ${colorClass(t.amount)}">${fmtYen(t.amount)}</div>
+      <button class="trade-delete" data-id="${t.id}">×</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.trade-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (confirm('削除しますか？')) {
+        await deleteTrade(Number(btn.dataset.id));
+        renderHome();
+        showToast('削除しました');
+      }
+    });
+  });
+}
+
+// ---- ENTRY ----
+const entryDateEl = document.getElementById('entryDate');
+const todayStr = today.toISOString().split('T')[0];
+entryDateEl.value = todayStr;
+
+document.getElementById('amountMinus').addEventListener('click', () => {
+  const el = document.getElementById('entryAmount');
+  const v = parseInt(el.value || '0');
+  el.value = v - 1000;
+});
+document.getElementById('amountPlus').addEventListener('click', () => {
+  const el = document.getElementById('entryAmount');
+  const v = parseInt(el.value || '0');
+  el.value = v + 1000;
+});
+
+document.getElementById('btnSave').addEventListener('click', async () => {
+  const date = document.getElementById('entryDate').value;
+  const pair = document.getElementById('entryPair').value;
+  const amount = parseInt(document.getElementById('entryAmount').value);
+  const memo = document.getElementById('entryMemo').value.trim();
+
+  if (!date) { showToast('日付を入力してください'); return; }
+  if (isNaN(amount) || amount === 0) { showToast('金額を入力してください'); return; }
+
+  await saveTrade({ date, pair, amount, memo });
+  document.getElementById('entryAmount').value = '';
+  document.getElementById('entryMemo').value = '';
+  showToast('保存しました ✓');
+
+  // ホームに戻る
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-page="home"]').classList.add('active');
+  document.getElementById('page-home').classList.add('active');
+  renderHome();
+});
+
+// ---- CALENDAR ----
+let calYear = today.getFullYear();
+let calMonth = today.getMonth() + 1;
+
+document.getElementById('calPrev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  renderCalendar();
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  renderCalendar();
+});
+
+async function renderCalendar() {
+  const trades = await getAllTrades();
+  const monthStr = `${calYear}-${String(calMonth).padStart(2,'0')}`;
+  const monthTrades = trades.filter(t => t.date.startsWith(monthStr));
+
+  document.getElementById('calTitle').textContent = `${calYear}/${String(calMonth).padStart(2,'0')}`;
+
+  // Monthly total
+  const monthTotal = monthTrades.reduce((s,t) => s+t.amount, 0);
+  const totalEl = document.getElementById('calTotal');
+  totalEl.textContent = fmtYen(monthTotal);
+  totalEl.className = 'cal-monthly-total ' + colorClass(monthTotal);
+  const wins = monthTrades.filter(t => t.amount > 0).length;
+  const losses = monthTrades.filter(t => t.amount < 0).length;
+  document.getElementById('calSub').textContent = `${monthTrades.length}トレード　${wins}勝 ${losses}敗`;
+
+  // Day map
+  const dayMap = {};
+  for (const t of monthTrades) {
+    const d = parseInt(t.date.split('-')[2]);
+    dayMap[d] = (dayMap[d] || 0) + t.amount;
+  }
+
+  // Build calendar
+  const firstDay = new Date(calYear, calMonth-1, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const todayDay = (today.getFullYear() === calYear && today.getMonth()+1 === calMonth) ? today.getDate() : -1;
+
+  const body = document.getElementById('calBody');
+  body.innerHTML = '';
+
+  let day = 1;
+  let week = 1;
+
+  for (let row = 0; row < 6; row++) {
+    if (day > daysInMonth) break;
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'cal-row';
+
+    let weekTotal = 0;
+    let hasDay = false;
+
+    for (let col = 0; col < 7; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell';
+
+      const isFirst = row === 0 && col < firstDay;
+      const isLast = day > daysInMonth;
+
+      if (!isFirst && !isLast) {
+        hasDay = true;
+        if (day === todayDay) cell.classList.add('today');
+
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'cal-day';
+        dayDiv.textContent = day;
+        cell.appendChild(dayDiv);
+
+        if (dayMap[day] !== undefined) {
+          weekTotal += dayMap[day];
+          const amtDiv = document.createElement('div');
+          amtDiv.className = 'cal-amount ' + colorClass(dayMap[day]);
+          // 小さい表示: +1,234 形式
+          const v = dayMap[day];
+          const abs = Math.abs(v);
+          let disp;
+          if (abs >= 10000) {
+            disp = (v >= 0 ? '+' : '-') + Math.round(abs/1000) + 'k';
+          } else {
+            disp = (v >= 0 ? '+' : '-') + abs.toLocaleString();
+          }
+          amtDiv.textContent = disp;
+          cell.appendChild(amtDiv);
+        }
+        day++;
+      }
+
+      rowEl.appendChild(cell);
+    }
+
+    // Week total cell
+    const weekCell = document.createElement('div');
+    weekCell.className = 'cal-week-cell';
+    if (hasDay) {
+      weekCell.innerHTML = `
+        <div class="cal-week-label">W${week}</div>
+        <div class="cal-week-amount ${colorClass(weekTotal)}">${weekTotal === 0 ? '–' : (weekTotal > 0 ? '+' : '') + Math.round(Math.abs(weekTotal)/100)*100 >= 10000 ? fmtYen(weekTotal).replace('¥','').replace('+','').replace('-','') + (weekTotal>=0?'+':'-') : fmtYen(weekTotal)}</div>
+      `;
+      // シンプルに
+      weekCell.innerHTML = `
+        <div class="cal-week-label">W${week}</div>
+        <div class="cal-week-amount ${colorClass(weekTotal)}">${weekTotal === 0 ? '–' : fmtYen(weekTotal)}</div>
+      `;
+      week++;
+    }
+    rowEl.appendChild(weekCell);
+    body.appendChild(rowEl);
+  }
+
+  // Pair breakdown
+  const pairMap = {};
+  for (const t of monthTrades) {
+    if (!pairMap[t.pair]) pairMap[t.pair] = { total: 0, wins: 0, losses: 0 };
+    pairMap[t.pair].total += t.amount;
+    if (t.amount > 0) pairMap[t.pair].wins++;
+    else pairMap[t.pair].losses++;
+  }
+
+  const breakdown = document.getElementById('pairBreakdown');
+  const pairs = Object.entries(pairMap).sort((a,b) => b[1].total - a[1].total);
+  if (pairs.length === 0) {
+    breakdown.innerHTML = '<div class="empty-msg">データなし</div>';
+  } else {
+    breakdown.innerHTML = pairs.map(([pair, s]) => `
+      <div class="pair-row">
+        <div>
+          <div class="pair-name">${pair}</div>
+          <div class="pair-stats">${s.wins+s.losses}回　${s.wins}勝${s.losses}敗</div>
+        </div>
+        <div class="pair-amount ${colorClass(s.total)}">${fmtYen(s.total)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ---- INIT ----
+initDB().then(() => {
+  renderHome();
+});
+</script>
+</body>
+</html>
