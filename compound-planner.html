@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>複利計画表</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22%E8%A4%87%E5%88%A9%E8%A8%88%E7%94%BB%E8%A1%A8%22,%22display%22:%22standalone%22}">
+<style>
+  :root {
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0d0d0d;
+    color: #e8e8e8;
+    font-family: -apple-system, 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+    padding: 20px 14px 60px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .2em; color: #8a8a8a;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 22px; letter-spacing: -0.01em; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .field-label { font-size: 11px; color: #9a9a9a; margin-bottom: 6px; letter-spacing: .03em; }
+  input[type=number] {
+    width: 100%; background: #141414; border: 1px solid #333; color: #f0f0f0;
+    padding: 10px 12px; font-size: 15px; outline: none; border-radius: 2px;
+  }
+  input[type=range] { width: 100%; accent-color: #c9c9c9; }
+  .full { grid-column: 1 / -1; }
+
+  .rate-toggle { display: flex; gap: 6px; margin-top: 6px; }
+  .toggle-btn {
+    flex: 1; background: #141414; border: 1px solid #333; color: #8a8a8a;
+    font-size: 11px; padding: 6px 8px; border-radius: 2px; letter-spacing: .02em;
+  }
+  .toggle-btn.active { background: #e8e8e8; color: #0d0d0d; border-color: #e8e8e8; font-weight: 700; }
+
+  .summary {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
+    background: #2a2a2a; border: 1px solid #2a2a2a; margin-bottom: 22px;
+  }
+  .summary .cell { background: #141414; padding: 13px 10px; }
+  .summary .label { font-size: 10px; color: #8a8a8a; margin-bottom: 6px; }
+  .summary .value { font-size: 16px; font-weight: 700; color: #d0d0d0; white-space: nowrap; }
+  .summary .cell.main .value { font-size: 18px; color: #fafafa; }
+  .summary .cell.main .value.milestone { color: #d4af37; }
+
+  .bars > div.milestone { background: #d4af37; }
+
+  .bars { display: flex; align-items: flex-end; gap: 2px; height: 74px; margin-bottom: 26px; }
+  .bars > div { flex: 1; background: #4a4a4a; }
+  .bars > div.last { background: #e8e8e8; }
+
+  table { width: 100%; border-collapse: collapse; border: 1px solid #2a2a2a; font-size: 13px; }
+  thead th {
+    background: #1a1a1a; color: #9a9a9a; font-weight: 600; font-size: 12px;
+    letter-spacing: .03em; padding: 10px 8px; border-bottom: 1px solid #2a2a2a; text-align: right;
+    position: sticky; top: 0;
+  }
+  thead th:first-child, tbody td:first-child { text-align: left; }
+  tbody td { padding: 9px 8px; text-align: right; border-bottom: 1px solid #1f1f1f; }
+  tbody tr:nth-child(odd) { background: #141414; }
+  tbody td.rate { text-align: center; color: #8a8a8a; }
+  tbody td.next { font-weight: 700; }
+  tbody td.next.milestone { color: #d4af37; }
+  .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; border-top: none; }
+
+  .foot-note { margin-top: 16px; font-size: 11px; color: #6a6a6a; line-height: 1.6; }
+  .save-row { display: flex; gap: 8px; align-items: center; margin: 6px 0 20px; }
+  .save-btn {
+    background: #1a1a1a; border: 1px solid #333; color: #d0d0d0; font-size: 12px;
+    padding: 8px 14px; border-radius: 2px;
+  }
+  .saved-note { font-size: 11px; color: #6a6a6a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Compound Growth Planner</div>
+  <h1>複利計画表</h1>
+
+  <div class="grid2">
+    <div>
+      <div class="field-label">初期投資金 (円)</div>
+      <input type="number" id="principal" value="100000">
+    </div>
+    <div>
+      <div class="field-label" id="rateLabel">月利 (%)</div>
+      <input type="number" id="rate" step="0.1" value="10">
+      <div class="rate-toggle" id="rateToggle">
+        <button type="button" class="toggle-btn active" data-mode="monthly">月利</button>
+        <button type="button" class="toggle-btn" data-mode="annual">年利</button>
+      </div>
+    </div>
+    <div class="full">
+      <div class="field-label" id="monthsLabel">期間: 60 ヶ月</div>
+      <input type="range" id="months" min="1" max="120" value="60">
+    </div>
+  </div>
+
+  <div class="save-row">
+    <button class="save-btn" id="saveBtn">この設定を保存</button>
+    <span class="saved-note" id="savedNote"></span>
+  </div>
+
+  <div class="summary">
+    <div class="cell main">
+      <div class="label">最終資産</div>
+      <div class="value" id="finalVal">-</div>
+    </div>
+    <div class="cell">
+      <div class="label">総利益</div>
+      <div class="value" id="profitVal">-</div>
+    </div>
+    <div class="cell">
+      <div class="label">倍率</div>
+      <div class="value" id="multipleVal">-</div>
+    </div>
+  </div>
+
+  <div class="saved-note" id="rateNote" style="margin-bottom:14px;"></div>
+
+  <div class="bars" id="bars"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th>
+      </tr>
+    </thead>
+  </table>
+  <div class="table-scroll">
+    <table><tbody id="tbody"></tbody></table>
+  </div>
+
+  <div class="foot-note">
+    初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const principalEl = $('principal');
+  const rateEl = $('rate');
+  const rateLabel = $('rateLabel');
+  const rateToggle = $('rateToggle');
+  const monthsEl = $('months');
+  const monthsLabel = $('monthsLabel');
+  const tbody = $('tbody');
+  const bars = $('bars');
+  const finalVal = $('finalVal');
+  const profitVal = $('profitVal');
+  const multipleVal = $('multipleVal');
+  const saveBtn = $('saveBtn');
+  const savedNote = $('savedNote');
+  const rateNote = $('rateNote');
+
+  let rateMode = 'monthly'; // 'monthly' | 'annual'
+  const MILESTONE = 100000000; // 1億円
+
+  const fmt = (n) => Math.round(n).toLocaleString('ja-JP');
+
+  function setRateMode(mode) {
+    rateMode = mode;
+    rateLabel.textContent = mode === 'monthly' ? '月利 (%)' : '年利 (%)';
+    rateToggle.querySelectorAll('.toggle-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    if (mode === 'annual') {
+      monthsEl.min = 12;
+      monthsEl.step = 12;
+      const rounded = Math.max(12, Math.round(Number(monthsEl.value) / 12) * 12);
+      monthsEl.value = Math.min(120, rounded);
+    } else {
+      monthsEl.min = 1;
+      monthsEl.step = 1;
+    }
+  }
+
+  rateToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
+    setRateMode(btn.dataset.mode);
+    render();
+  });
+
+  function load() {
+    try {
+      const raw = localStorage.getItem('compoundPlanner');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.principal != null) principalEl.value = d.principal;
+        if (d.rate != null) rateEl.value = d.rate;
+        if (d.months != null) monthsEl.value = d.months;
+        if (d.rateMode) setRateMode(d.rateMode);
+        savedNote.textContent = '保存済みの設定を読み込みました';
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function save() {
+    const data = {
+      principal: Number(principalEl.value) || 0,
+      rate: Number(rateEl.value) || 0,
+      months: Number(monthsEl.value) || 1,
+      rateMode,
+    };
+    localStorage.setItem('compoundPlanner', JSON.stringify(data));
+    savedNote.textContent = '保存しました';
+  }
+
+  function render() {
+    const principal = Number(principalEl.value) || 0;
+    const inputRate = Number(rateEl.value) || 0;
+    const months = Number(monthsEl.value) || 1;
+    monthsLabel.textContent = rateMode === 'annual'
+      ? `期間: ${Math.round(months / 12)} 年 (${months}ヶ月)`
+      : `期間: ${months} ヶ月`;
+
+    // Convert to an effective monthly rate for the compounding loop.
+    // Annual rate is treated as the equivalent compounded monthly rate.
+    const r = rateMode === 'monthly'
+      ? inputRate / 100
+      : Math.pow(1 + inputRate / 100, 1 / 12) - 1;
+    const displayRatePct = rateMode === 'monthly'
+      ? inputRate
+      : (r * 100);
+
+    let carry = principal;
+    const rows = [];
+    for (let m = 1; m <= months; m++) {
+      const invest = carry;
+      const profit = invest * r;
+      const next = invest + profit;
+      rows.push({ m, invest, profit, next });
+      carry = next;
+    }
+
+    const final = rows.length ? rows[rows.length - 1].next : principal;
+    const totalProfit = final - principal;
+    const multiple = principal > 0 ? final / principal : 0;
+
+    finalVal.textContent = `¥${fmt(final)}`;
+    finalVal.classList.toggle('milestone', final >= MILESTONE);
+    profitVal.textContent = `¥${fmt(totalProfit)}`;
+    multipleVal.textContent = `${multiple.toFixed(1)}x`;
+
+    const maxVal = rows.length ? rows[rows.length - 1].next : 1;
+    bars.innerHTML = rows.map(r =>
+      `<div class="${r.next >= MILESTONE ? 'milestone' : (r.m === months ? 'last' : '')}" style="height:${Math.max(4, (r.next / maxVal) * 74)}px" title="${r.m}ヶ月目: ¥${fmt(r.next)}"></div>`
+    ).join('');
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.m}ヶ月目</td>
+        <td>${fmt(r.invest)}</td>
+        <td class="rate">${displayRatePct.toFixed(2)}%</td>
+        <td>${fmt(r.profit)}</td>
+        <td class="next${r.next >= MILESTONE ? ' milestone' : ''}">${fmt(r.next)}</td>
+      </tr>
+    `).join('');
+
+    rateNote.textContent = rateMode === 'annual'
+      ? `年利${inputRate}%を月換算(複利)すると月利${displayRatePct.toFixed(2)}%です。`
+      : '';
+  }
+
+  [principalEl, rateEl, monthsEl].forEach(el => el.addEventListener('input', render));
+  saveBtn.addEventListener('click', save);
+
+  load();
+  render();
+</script>
+</body>
+</html>
