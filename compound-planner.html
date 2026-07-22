@@ -57,20 +57,21 @@
   .bars > div { flex: 1; background: #4a4a4a; }
   .bars > div.last { background: #e8e8e8; }
 
-  table { width: 100%; border-collapse: collapse; border: 1px solid #2a2a2a; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
   thead th {
-    background: #1a1a1a; color: #9a9a9a; font-weight: 600; font-size: 12px;
-    letter-spacing: .03em; padding: 10px 8px; border-bottom: 1px solid #2a2a2a; text-align: right;
-    position: sticky; top: 0;
+    background: #1a1a1a; color: #9a9a9a; font-weight: 600; font-size: 11px;
+    letter-spacing: .01em; padding: 10px 4px; border-bottom: 1px solid #2a2a2a; text-align: right;
+    position: sticky; top: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   thead th:first-child, tbody td:first-child { text-align: left; }
-  tbody td { padding: 9px 8px; text-align: right; border-bottom: 1px solid #1f1f1f; }
+  thead th:nth-child(3) { text-align: center; }
+  tbody td { padding: 9px 6px; text-align: right; border-bottom: 1px solid #1f1f1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tbody tr:nth-child(odd) { background: #141414; }
   tbody td.rate { text-align: center; color: #8a8a8a; }
   tbody td.next { font-weight: 700; }
   tbody td.next.milestone { color: #d4af37; }
   tbody td.evenpace { color: #9a9a9a; font-style: italic; }
-  .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; border-top: none; }
+  .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; }
 
   .foot-note { margin-top: 16px; font-size: 11px; color: #6a6a6a; line-height: 1.6; }
   .save-row { display: flex; gap: 8px; align-items: center; margin: 6px 0 20px; }
@@ -133,15 +134,23 @@
 
   <div class="bars" id="bars"></div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th>均等ペース残高</th>
-      </tr>
-    </thead>
-  </table>
   <div class="table-scroll">
-    <table><tbody id="tbody"></tbody></table>
+    <table>
+      <colgroup>
+        <col style="width:16%">
+        <col style="width:18%">
+        <col style="width:14%">
+        <col style="width:16%">
+        <col style="width:18%">
+        <col style="width:18%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th>均等ペース残高</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 
   <div class="foot-note">
