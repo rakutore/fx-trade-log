@@ -42,7 +42,7 @@
   .toggle-btn.active { background: #e8e8e8; color: #0d0d0d; border-color: #e8e8e8; font-weight: 700; }
 
   .summary {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 1px;
     background: #2a2a2a; border: 1px solid #2a2a2a; margin-bottom: 22px;
   }
   .summary .cell { background: #141414; padding: 13px 10px; }
@@ -69,6 +69,7 @@
   tbody td.rate { text-align: center; color: #8a8a8a; }
   tbody td.next { font-weight: 700; }
   tbody td.next.milestone { color: #d4af37; }
+  tbody td.evenpace { color: #9a9a9a; font-style: italic; }
   .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; border-top: none; }
 
   .foot-note { margin-top: 16px; font-size: 11px; color: #6a6a6a; line-height: 1.6; }
@@ -122,6 +123,10 @@
       <div class="label">倍率</div>
       <div class="value" id="multipleVal">-</div>
     </div>
+    <div class="cell">
+      <div class="label">均等ペース(毎月目標)</div>
+      <div class="value" id="evenPaceVal">-</div>
+    </div>
   </div>
 
   <div class="saved-note" id="rateNote" style="margin-bottom:14px;"></div>
@@ -131,7 +136,7 @@
   <table>
     <thead>
       <tr>
-        <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th>
+        <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th>均等ペース残高</th>
       </tr>
     </thead>
   </table>
@@ -140,7 +145,8 @@
   </div>
 
   <div class="foot-note">
-    初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。
+    初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
+    「均等ペース」は、複利計算で見込む期間全体の利益を月数で均等に割った金額です。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
   </div>
 </div>
 
@@ -157,6 +163,7 @@
   const finalVal = $('finalVal');
   const profitVal = $('profitVal');
   const multipleVal = $('multipleVal');
+  const evenPaceVal = $('evenPaceVal');
   const saveBtn = $('saveBtn');
   const savedNote = $('savedNote');
   const rateNote = $('rateNote');
@@ -251,6 +258,10 @@
     profitVal.textContent = `¥${fmt(totalProfit)}`;
     multipleVal.textContent = `${multiple.toFixed(1)}x`;
 
+    // 均等ペース: 複利で見込む総利益を期間で割った「毎月固定で狙う利益額」
+    const evenPaceMonthly = months > 0 ? totalProfit / months : 0;
+    evenPaceVal.textContent = `¥${fmt(evenPaceMonthly)}`;
+
     const maxVal = rows.length ? rows[rows.length - 1].next : 1;
     bars.innerHTML = rows.map(r =>
       `<div class="${r.next >= MILESTONE ? 'milestone' : (r.m === months ? 'last' : '')}" style="height:${Math.max(4, (r.next / maxVal) * 74)}px" title="${r.m}ヶ月目: ¥${fmt(r.next)}"></div>`
@@ -263,6 +274,7 @@
         <td class="rate">${displayRatePct.toFixed(2)}%</td>
         <td>${fmt(r.profit)}</td>
         <td class="next${r.next >= MILESTONE ? ' milestone' : ''}">${fmt(r.next)}</td>
+        <td class="evenpace">${fmt(principal + evenPaceMonthly * r.m)}</td>
       </tr>
     `).join('');
 
