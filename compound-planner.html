@@ -85,7 +85,7 @@
 <body>
 <div class="wrap">
   <div class="eyebrow">Compound Growth Planner</div>
-  <h1>複利計画表</h1>
+  <h1 id="pageTitle">複利計画表</h1>
 
   <div class="grid2">
     <div>
@@ -103,6 +103,13 @@
     <div class="full">
       <div class="field-label" id="monthsLabel">期間: 60 ヶ月</div>
       <input type="range" id="months" min="1" max="120" value="60">
+    </div>
+    <div class="full">
+      <div class="field-label">計算方式</div>
+      <div class="rate-toggle" id="calcToggle">
+        <button type="button" class="toggle-btn active" data-calc="compound">複利</button>
+        <button type="button" class="toggle-btn" data-calc="simple">単利</button>
+      </div>
     </div>
   </div>
 
@@ -124,7 +131,7 @@
       <div class="label">倍率</div>
       <div class="value" id="multipleVal">-</div>
     </div>
-    <div class="cell">
+    <div class="cell" id="evenPaceCard">
       <div class="label">均等ペース(毎月目標)</div>
       <div class="value" id="evenPaceVal">-</div>
     </div>
@@ -142,11 +149,11 @@
         <col style="width:14%">
         <col style="width:16%">
         <col style="width:18%">
-        <col style="width:18%">
+        <col style="width:18%" id="evenPaceCol">
       </colgroup>
       <thead>
         <tr>
-          <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th>均等ペース残高</th>
+          <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th class="evenpace-th">均等ペース残高</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -155,6 +162,7 @@
 
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
+    「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です(単利は元々毎月一定額なので、均等ペース欄は非表示になります)。<br><br>
     「均等ペース」は、複利計算で見込む期間全体の利益を月数で均等に割った金額です。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
   </div>
 </div>
@@ -173,11 +181,16 @@
   const profitVal = $('profitVal');
   const multipleVal = $('multipleVal');
   const evenPaceVal = $('evenPaceVal');
+  const evenPaceCard = $('evenPaceCard');
+  const evenPaceCol = $('evenPaceCol');
   const saveBtn = $('saveBtn');
   const savedNote = $('savedNote');
   const rateNote = $('rateNote');
+  const calcToggle = $('calcToggle');
+  const pageTitle = $('pageTitle');
 
   let rateMode = 'monthly'; // 'monthly' | 'annual'
+  let calcMode = 'compound'; // 'compound' | 'simple'
   const MILESTONE = 100000000; // 1億円
 
   const fmt = (n) => Math.round(n).toLocaleString('ja-JP');
@@ -206,6 +219,21 @@
     render();
   });
 
+  function setCalcMode(mode) {
+    calcMode = mode;
+    pageTitle.textContent = mode === 'compound' ? '複利計画表' : '単利計画表';
+    calcToggle.querySelectorAll('.toggle-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.calc === mode);
+    });
+  }
+
+  calcToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
+    setCalcMode(btn.dataset.calc);
+    render();
+  });
+
   function load() {
     try {
       const raw = localStorage.getItem('compoundPlanner');
@@ -215,6 +243,7 @@
         if (d.rate != null) rateEl.value = d.rate;
         if (d.months != null) monthsEl.value = d.months;
         if (d.rateMode) setRateMode(d.rateMode);
+        if (d.calcMode) setCalcMode(d.calcMode);
         savedNote.textContent = '保存済みの設定を読み込みました';
       }
     } catch (e) { /* ignore */ }
@@ -226,6 +255,7 @@
       rate: Number(rateEl.value) || 0,
       months: Number(monthsEl.value) || 1,
       rateMode,
+      calcMode,
     };
     localStorage.setItem('compoundPlanner', JSON.stringify(data));
     savedNote.textContent = '保存しました';
@@ -251,11 +281,20 @@
     let carry = principal;
     const rows = [];
     for (let m = 1; m <= months; m++) {
-      const invest = carry;
-      const profit = invest * r;
-      const next = invest + profit;
+      let invest, profit, next;
+      if (calcMode === 'simple') {
+        // 単利: 毎月の投資金は常に初期投資金のまま、利益は積み上げるだけで再投資しない
+        invest = principal;
+        profit = principal * r;
+        next = principal + profit * m;
+      } else {
+        // 複利: 前月の残高(投資金+利益)を翌月の投資金として使う
+        invest = carry;
+        profit = invest * r;
+        next = invest + profit;
+        carry = next;
+      }
       rows.push({ m, invest, profit, next });
-      carry = next;
     }
 
     const final = rows.length ? rows[rows.length - 1].next : principal;
@@ -268,8 +307,15 @@
     multipleVal.textContent = `${multiple.toFixed(1)}x`;
 
     // 均等ペース: 複利で見込む総利益を期間で割った「毎月固定で狙う利益額」
+    // 単利モードではもともと毎月一定額なので、この列は意味を持たず非表示にする
     const evenPaceMonthly = months > 0 ? totalProfit / months : 0;
+    const showEvenPace = calcMode === 'compound';
+    evenPaceCard.style.display = showEvenPace ? '' : 'none';
     evenPaceVal.textContent = `¥${fmt(evenPaceMonthly)}`;
+    evenPaceCol.style.display = showEvenPace ? '' : 'none';
+    document.querySelectorAll('.evenpace-th').forEach(el => {
+      el.style.display = showEvenPace ? '' : 'none';
+    });
 
     const maxVal = rows.length ? rows[rows.length - 1].next : 1;
     bars.innerHTML = rows.map(r =>
@@ -283,7 +329,7 @@
         <td class="rate">${displayRatePct.toFixed(2)}%</td>
         <td>${fmt(r.profit)}</td>
         <td class="next${r.next >= MILESTONE ? ' milestone' : ''}">${fmt(r.next)}</td>
-        <td class="evenpace">${fmt(principal + evenPaceMonthly * r.m)}</td>
+        ${showEvenPace ? `<td class="evenpace">${fmt(principal + evenPaceMonthly * r.m)}</td>` : ''}
       </tr>
     `).join('');
 
