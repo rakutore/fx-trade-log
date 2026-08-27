@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FX MONEY LOG</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap');
 
   :root {
     --bg: #f0ede8;
@@ -28,7 +28,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   body {
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Zen Maru Gothic', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -45,7 +45,7 @@
     align-items: flex-end;
   }
   .header-title {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -53,11 +53,11 @@
   .header-sub {
     font-size: 10px;
     color: #aaa;
-    font-family: 'Zen Kaku Gothic New', monospace;
+    font-family: 'Zen Maru Gothic', sans-serif;
     letter-spacing: 0.05em;
   }
   .header-date {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 11px;
     color: #aaa;
   }
@@ -69,20 +69,20 @@
   /* CARDS */
   .card {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 18px;
     margin-bottom: 12px;
     border: 1px solid var(--border);
   }
   .card-label {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     letter-spacing: 0.15em;
     color: var(--text-sub);
     margin-bottom: 6px;
   }
   .card-value {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 32px;
     font-weight: 700;
     line-height: 1;
@@ -106,7 +106,7 @@
   /* FORM */
   .form-group { margin-bottom: 14px; }
   .form-label {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: var(--text-sub);
@@ -117,9 +117,9 @@
     width: 100%;
     padding: 12px 14px;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--bg);
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Zen Maru Gothic', sans-serif;
     font-size: 15px;
     color: var(--text);
     outline: none;
@@ -151,7 +151,7 @@
     width: 42px;
     height: 42px;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 50%;
     background: var(--bg);
     font-size: 20px;
     cursor: pointer;
@@ -163,7 +163,7 @@
   }
   .amount-row .form-input {
     text-align: center;
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 18px;
   }
 
@@ -174,8 +174,8 @@
     background: var(--accent);
     color: white;
     border: none;
-    border-radius: 10px;
-    font-family: 'Space Mono', monospace;
+    border-radius: 14px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 12px;
     letter-spacing: 0.1em;
     cursor: pointer;
@@ -185,7 +185,7 @@
 
   /* TRADE LIST */
   .section-label {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     letter-spacing: 0.15em;
     color: var(--text-sub);
@@ -193,7 +193,7 @@
   }
   .trade-item {
     background: var(--card);
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 13px 15px;
     margin-bottom: 8px;
     border: 1px solid var(--border);
@@ -204,11 +204,11 @@
   .trade-pair {
     background: var(--accent);
     color: white;
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     font-weight: 700;
     padding: 4px 8px;
-    border-radius: 5px;
+    border-radius: 8px;
     letter-spacing: 0.05em;
     white-space: nowrap;
   }
@@ -216,7 +216,7 @@
   .trade-date { font-size: 11px; color: var(--text-sub); }
   .trade-memo { font-size: 12px; color: var(--text); margin-top: 1px; }
   .trade-amount {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 15px;
     font-weight: 700;
     white-space: nowrap;
@@ -243,7 +243,7 @@
   .cal-nav-btn {
     background: none;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     width: 36px;
     height: 36px;
     font-size: 16px;
@@ -254,14 +254,14 @@
     color: var(--text);
   }
   .cal-title {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.05em;
   }
   .cal-monthly-total {
     text-align: center;
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 14px;
@@ -276,19 +276,20 @@
     margin-bottom: 16px;
   }
 
+  /* 週計カラムがはみ出して表示が切れていたのを、幅を確保+可変フォントサイズで修正 */
   .cal-grid {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid var(--border);
     overflow: hidden;
   }
   .cal-header-row {
     display: grid;
-    grid-template-columns: repeat(7, 1fr) 80px;
+    grid-template-columns: repeat(7, 1fr) minmax(56px, 72px);
     border-bottom: 1px solid var(--border);
   }
   .cal-header-cell {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     letter-spacing: 0.05em;
     color: var(--text-sub);
@@ -298,7 +299,7 @@
   .cal-header-cell.week-col { color: var(--text-sub); font-size: 8px; }
   .cal-row {
     display: grid;
-    grid-template-columns: repeat(7, 1fr) 80px;
+    grid-template-columns: repeat(7, 1fr) minmax(56px, 72px);
     border-bottom: 1px solid var(--border);
     min-height: 52px;
   }
@@ -310,6 +311,7 @@
     flex-direction: column;
     align-items: center;
     min-height: 52px;
+    overflow: hidden;
   }
   .cal-cell:last-child { border-right: none; }
   .cal-day {
@@ -329,7 +331,7 @@
     font-size: 9px;
   }
   .cal-amount {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 9px;
     font-weight: 700;
     margin-top: 3px;
@@ -346,18 +348,23 @@
     justify-content: center;
     background: #f7f4f0;
     min-height: 52px;
+    overflow: hidden;
   }
   .cal-week-label {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 7px;
     color: var(--text-sub);
     letter-spacing: 0.05em;
   }
   .cal-week-amount {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    /* 固定9pxだと4桁後半〜5桁で幅からはみ出して欠けていたため、
+       文字量に応じて縮む可変フォントサイズに変更 */
+    font-size: clamp(6.5px, 2.1vw, 9px);
     font-weight: 700;
     margin-top: 2px;
+    white-space: nowrap;
+    max-width: 100%;
   }
   .cal-week-amount.pos { color: var(--green); }
   .cal-week-amount.neg { color: var(--red); }
@@ -372,13 +379,13 @@
   }
   .pair-row:last-child { border-bottom: none; }
   .pair-name {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 12px;
     font-weight: 700;
   }
   .pair-stats { font-size: 11px; color: var(--text-sub); }
   .pair-amount {
-    font-family: 'Space Mono', monospace;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     font-size: 14px;
     font-weight: 700;
   }
@@ -412,7 +419,7 @@
   .nav-label {
     font-size: 9px;
     margin-top: 3px;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Zen Maru Gothic', sans-serif;
     letter-spacing: 0.02em;
   }
 
@@ -843,15 +850,10 @@ async function renderCalendar() {
       rowEl.appendChild(cell);
     }
 
-    // Week total cell
+    // Week total cell（不要だった重複代入を削除し、シンプルな1回だけの組み立てに整理）
     const weekCell = document.createElement('div');
     weekCell.className = 'cal-week-cell';
     if (hasDay) {
-      weekCell.innerHTML = `
-        <div class="cal-week-label">W${week}</div>
-        <div class="cal-week-amount ${colorClass(weekTotal)}">${weekTotal === 0 ? '–' : (weekTotal > 0 ? '+' : '') + Math.round(Math.abs(weekTotal)/100)*100 >= 10000 ? fmtYen(weekTotal).replace('¥','').replace('+','').replace('-','') + (weekTotal>=0?'+':'-') : fmtYen(weekTotal)}</div>
-      `;
-      // シンプルに
       weekCell.innerHTML = `
         <div class="cal-week-label">W${week}</div>
         <div class="cal-week-amount ${colorClass(weekTotal)}">${weekTotal === 0 ? '–' : fmtYen(weekTotal)}</div>
