@@ -27,13 +27,20 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  body {
-    font-family: 'Zen Maru Gothic', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 70px;
-  }
+html {
+  background: #e6e2f2;
+}
+
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 70px;
+  box-shadow: 0 0 40px rgba(50,40,90,.10);
+}
 
   /* HEADER */
   .header {
@@ -396,8 +403,10 @@
   .nav {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     background: var(--nav-bg);
     display: flex;
     border-top: 1px solid #333;
