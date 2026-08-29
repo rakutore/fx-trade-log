@@ -445,6 +445,51 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* EMAIL GATE */
+  .email-gate {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+  }
+  .email-gate.show { display: flex; }
+  .email-gate-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 26px 22px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .email-gate-title {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .email-gate-lead {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .email-gate-sub {
+    font-size: 11.5px;
+    color: var(--text-sub);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .email-gate-error {
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 8px;
+    min-height: 14px;
+  }
+
   /* ANCHOR CTA */
   .anchor-cta {
     display: block;
@@ -490,6 +535,18 @@
     <div class="header-sub">円損益トラッカー</div>
   </div>
   <div class="header-date" id="headerDate"></div>
+</div>
+
+<!-- EMAIL GATE OVERLAY -->
+<div class="email-gate" id="emailGate">
+  <div class="email-gate-card">
+    <div class="email-gate-title">FX MONEY LOG</div>
+    <div class="email-gate-lead">はじめに、メールアドレスをご登録ください。</div>
+    <div class="email-gate-sub">今後のアップデートやお知らせをお届けします。入力後、すぐにご利用いただけます。</div>
+    <input type="email" class="form-input" id="gateEmail" placeholder="you@example.com" inputmode="email">
+    <button class="btn-submit" id="gateSubmit" style="margin-top:10px;">はじめる</button>
+    <div class="email-gate-error" id="gateError"></div>
+  </div>
 </div>
 
 <!-- HOME PAGE -->
@@ -925,7 +982,59 @@ async function renderCalendar() {
   }
 }
 
+// ---- EMAIL GATE ----
+// 送信先: rakutore-api に /api/leads を追加する想定（末尾のバックエンド実装例を参照）
+const LEADS_ENDPOINT = 'https://api.rakutore.jp/api/leads';
+const EMAIL_STORAGE_KEY = 'moneylog_registered_email';
+
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function initEmailGate() {
+  const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+  if (savedEmail) return; // 登録済みなら何もしない
+
+  const gate = document.getElementById('emailGate');
+  gate.classList.add('show');
+
+  const emailInput = document.getElementById('gateEmail');
+  const errorEl = document.getElementById('gateError');
+  const submitBtn = document.getElementById('gateSubmit');
+
+  submitBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!isValidEmail(email)) {
+      errorEl.textContent = 'メールアドレスの形式が正しくありません';
+      return;
+    }
+    errorEl.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送信中...';
+
+    // 先にローカルへ保存 → API側が未整備/通信失敗でも利用をブロックしない（フェイルオープン）
+    localStorage.setItem(EMAIL_STORAGE_KEY, email);
+
+    try {
+      await fetch(LEADS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'money-log' })
+      });
+    } catch (e) {
+      console.warn('leads送信に失敗しましたが、アプリの利用は継続します', e);
+    }
+
+    gate.classList.remove('show');
+  });
+
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitBtn.click();
+  });
+}
+
 // ---- INIT ----
+initEmailGate();
 initDB().then(() => {
   renderHome();
 });
