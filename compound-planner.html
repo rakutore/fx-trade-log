@@ -87,10 +87,91 @@
     padding: 8px 14px; border-radius: 2px;
   }
   .saved-note { font-size: 11px; color: #6a6a6a; }
+
+  /* EMAIL GATE（Money Logと同じ白基調のカードに統一） */
+  .email-gate {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+  }
+  .email-gate.show { display: flex; }
+  .email-gate-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 16px;
+    padding: 26px 22px;
+    width: 100%;
+    max-width: 340px;
+    box-sizing: border-box;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .email-gate-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    margin-bottom: 14px;
+    color: #1a1a1a;
+  }
+  .email-gate-lead {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #1a1a1a;
+  }
+  .email-gate-sub {
+    font-size: 11.5px;
+    color: #888;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .email-gate-card input[type=email] {
+    width: 100%;
+    background: #f0ede8;
+    border: 1px solid #e0dbd3;
+    color: #1a1a1a;
+    padding: 10px 12px;
+    font-size: 15px;
+    outline: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  .email-gate-card .save-btn {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .email-gate-error {
+    font-size: 11px;
+    color: #c0392b;
+    margin-top: 8px;
+    min-height: 14px;
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <!-- EMAIL GATE OVERLAY -->
+  <div class="email-gate" id="emailGate">
+    <div class="email-gate-card">
+      <div class="email-gate-title">複利計画表</div>
+      <div class="email-gate-lead">はじめに、メールアドレスをご登録ください。</div>
+      <div class="email-gate-sub">今後のアップデートやお知らせをお届けします。入力後、すぐにご利用いただけます。</div>
+      <input type="email" id="gateEmail" placeholder="you@example.com" inputmode="email">
+      <button type="button" class="save-btn" id="gateSubmit" style="width:100%;margin-top:10px;">はじめる</button>
+      <div class="email-gate-error" id="gateError"></div>
+    </div>
+  </div>
+
   <div class="eyebrow">Compound Growth Planner</div>
   <h1 id="pageTitle">複利計画表</h1>
 
@@ -181,6 +262,57 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+
+  // ---- EMAIL GATE ----
+  const LEADS_ENDPOINT = 'https://api.rakutore.jp/api/leads';
+  const EMAIL_STORAGE_KEY = 'compoundplanner_registered_email';
+
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  function initEmailGate() {
+    const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+    if (savedEmail) return;
+
+    const gate = $('emailGate');
+    gate.classList.add('show');
+
+    const emailInput = $('gateEmail');
+    const errorEl = $('gateError');
+    const submitBtn = $('gateSubmit');
+
+    submitBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      if (!isValidEmail(email)) {
+        errorEl.textContent = 'メールアドレスの形式が正しくありません';
+        return;
+      }
+      errorEl.textContent = '';
+      submitBtn.disabled = true;
+      submitBtn.textContent = '送信中...';
+
+      localStorage.setItem(EMAIL_STORAGE_KEY, email);
+
+      try {
+        await fetch(LEADS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'compound-planner' })
+        });
+      } catch (e) {
+        console.warn('leads送信に失敗しましたが、アプリの利用は継続します', e);
+      }
+
+      gate.classList.remove('show');
+    });
+
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitBtn.click();
+    });
+  }
+  initEmailGate();
+
   const principalEl = $('principal');
   const rateEl = $('rate');
   const rateLabel = $('rateLabel');
