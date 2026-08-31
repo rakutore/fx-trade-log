@@ -71,6 +71,13 @@
   tbody td.next { font-weight: 700; }
   tbody td.next.milestone { color: #d4af37; }
   tbody td.evenpace { color: #9a9a9a; font-style: italic; }
+  tbody tr.stepup-row td { border-top: 2px solid #d4af37; }
+  tbody tr.stepup-row td:first-child::after {
+    content: " ⬆︎ロットアップ";
+    color: #d4af37;
+    font-size: 10px;
+    font-style: normal;
+  }
   .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; }
 
   .foot-note { margin-top: 16px; font-size: 11px; color: #6a6a6a; line-height: 1.6; }
@@ -109,7 +116,12 @@
       <div class="rate-toggle" id="calcToggle">
         <button type="button" class="toggle-btn active" data-calc="compound">複利</button>
         <button type="button" class="toggle-btn" data-calc="simple">単利</button>
+        <button type="button" class="toggle-btn" data-calc="stepup">資金増でロットアップ</button>
       </div>
+    </div>
+    <div class="full" id="stepupField" style="display:none;">
+      <div class="field-label">ロットアップ閾値（資金が+何%増えたら上げるか）</div>
+      <input type="number" id="stepupThreshold" step="1" value="100">
     </div>
   </div>
 
@@ -162,8 +174,8 @@
 
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
-    「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です(単利は元々毎月一定額なので、均等ペース欄は非表示になります)。<br><br>
-    「均等ペース」は、複利計算で見込む期間全体の利益を月数で均等に割った金額です。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
+    「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。（単利モードのみ、元々毎月一定額なので均等ペース欄は非表示になります）<br><br>
+    「均等ペース」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
   </div>
 </div>
 
@@ -188,6 +200,8 @@
   const rateNote = $('rateNote');
   const calcToggle = $('calcToggle');
   const pageTitle = $('pageTitle');
+  const stepupField = $('stepupField');
+  const stepupThresholdEl = $('stepupThreshold');
 
   let rateMode = 'monthly'; // 'monthly' | 'annual'
   let calcMode = 'compound'; // 'compound' | 'simple'
@@ -221,10 +235,13 @@
 
   function setCalcMode(mode) {
     calcMode = mode;
-    pageTitle.textContent = mode === 'compound' ? '複利計画表' : '単利計画表';
+    pageTitle.textContent = mode === 'compound' ? '複利計画表'
+      : mode === 'simple' ? '単利計画表'
+      : '資金増ロットアップ計画表';
     calcToggle.querySelectorAll('.toggle-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.calc === mode);
     });
+    stepupField.style.display = mode === 'stepup' ? '' : 'none';
   }
 
   calcToggle.addEventListener('click', (e) => {
@@ -242,6 +259,7 @@
         if (d.principal != null) principalEl.value = d.principal;
         if (d.rate != null) rateEl.value = d.rate;
         if (d.months != null) monthsEl.value = d.months;
+        if (d.stepupThreshold != null) stepupThresholdEl.value = d.stepupThreshold;
         if (d.rateMode) setRateMode(d.rateMode);
         if (d.calcMode) setCalcMode(d.calcMode);
         savedNote.textContent = '保存済みの設定を読み込みました';
@@ -254,6 +272,7 @@
       principal: Number(principalEl.value) || 0,
       rate: Number(rateEl.value) || 0,
       months: Number(monthsEl.value) || 1,
+      stepupThreshold: Number(stepupThresholdEl.value) || 100,
       rateMode,
       calcMode,
     };
@@ -279,14 +298,29 @@
       : (r * 100);
 
     let carry = principal;
+    let lotBase = principal; // 現在のロット計算の基準額（ロットアップで更新される）
+    const stepupThresholdPct = Number(stepupThresholdEl.value) || 0;
+    let stepupCount = 0;
     const rows = [];
     for (let m = 1; m <= months; m++) {
-      let invest, profit, next;
+      let invest, profit, next, isStepup = false;
       if (calcMode === 'simple') {
         // 単利: 毎月の投資金は常に初期投資金のまま、利益は積み上げるだけで再投資しない
         invest = principal;
         profit = principal * r;
         next = principal + profit * m;
+      } else if (calcMode === 'stepup') {
+        // 資金増でロットアップ: ロット基準額(lotBase)に対する利益を毎月積み上げ（ブロック内は単利的）、
+        // 資金がロット基準額の+しきい値%に達したら、その時点の資金を新しいロット基準額に更新する
+        invest = lotBase;
+        profit = lotBase * r;
+        next = carry + profit;
+        carry = next;
+        if (stepupThresholdPct > 0 && next >= lotBase * (1 + stepupThresholdPct / 100)) {
+          lotBase = next;
+          isStepup = true;
+          stepupCount++;
+        }
       } else {
         // 複利: 前月の残高(投資金+利益)を翌月の投資金として使う
         invest = carry;
@@ -294,7 +328,7 @@
         next = invest + profit;
         carry = next;
       }
-      rows.push({ m, invest, profit, next });
+      rows.push({ m, invest, profit, next, isStepup });
     }
 
     const final = rows.length ? rows[rows.length - 1].next : principal;
@@ -306,10 +340,10 @@
     profitVal.textContent = `¥${fmt(totalProfit)}`;
     multipleVal.textContent = `${multiple.toFixed(1)}x`;
 
-    // 均等ペース: 複利で見込む総利益を期間で割った「毎月固定で狙う利益額」
-    // 単利モードではもともと毎月一定額なので、この列は意味を持たず非表示にする
-    const evenPaceMonthly = months > 0 ? totalProfit / months : 0;
-    const showEvenPace = calcMode === 'compound';
+    // 均等ペース: 「初期投資金に対して、複利1ヶ月目と同じ利益率」を毎月ずっと狙う場合の固定目標額
+    // これにより期間を延ばしても（totalProfitが複利で膨らんでも）目標額が非現実的に大きくならない
+    const evenPaceMonthly = principal * r;
+    const showEvenPace = calcMode !== 'simple';
     evenPaceCard.style.display = showEvenPace ? '' : 'none';
     evenPaceVal.textContent = `¥${fmt(evenPaceMonthly)}`;
     evenPaceCol.style.display = showEvenPace ? '' : 'none';
@@ -323,7 +357,7 @@
     ).join('');
 
     tbody.innerHTML = rows.map(r => `
-      <tr>
+      <tr class="${r.isStepup ? 'stepup-row' : ''}">
         <td>${r.m}ヶ月目</td>
         <td>${fmt(r.invest)}</td>
         <td class="rate">${displayRatePct.toFixed(2)}%</td>
@@ -336,9 +370,13 @@
     rateNote.textContent = rateMode === 'annual'
       ? `年利${inputRate}%を月換算(複利)すると月利${displayRatePct.toFixed(2)}%です。`
       : '';
+    if (calcMode === 'stepup') {
+      const extra = `${stepupCount}回ロットアップしました（しきい値+${stepupThresholdPct}%ごと）。`;
+      rateNote.textContent = rateNote.textContent ? `${rateNote.textContent} ${extra}` : extra;
+    }
   }
 
-  [principalEl, rateEl, monthsEl].forEach(el => el.addEventListener('input', render));
+  [principalEl, rateEl, monthsEl, stepupThresholdEl].forEach(el => el.addEventListener('input', render));
   saveBtn.addEventListener('click', save);
 
   load();
