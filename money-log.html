@@ -220,6 +220,13 @@ body {
     color: var(--text-sub);
     margin-bottom: 10px;
   }
+  /* 直近記録を一定件数までスクロールで見られるように */
+  .recent-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 2px;
+  }
   .trade-item {
     background: var(--card);
     border-radius: 14px;
@@ -601,7 +608,9 @@ body {
   </div>
 
   <div class="section-label">RECENT TRADES</div>
-  <div id="recentList"></div>
+  <div class="recent-scroll" id="recentScroll">
+    <div id="recentList"></div>
+  </div>
 </div>
 
 <!-- ENTRY PAGE -->
@@ -781,6 +790,11 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 });
 
 // ---- HOME ----
+// 画面に最初に見える件数はそのまま(直近の見た目は変えない)。
+// スクロールで遡れるよう、保持しておく件数だけ増やす。
+const RECENT_VISIBLE_HINT = 10; // 見た目上の目安(スクロール前に見える想定件数)
+const RECENT_LOAD_COUNT = 50;   // スクロールで遡れる件数
+
 async function renderHome() {
   const trades = await getAllTrades();
   const year = today.getFullYear();
@@ -811,7 +825,9 @@ async function renderHome() {
   document.getElementById('homeWinSub').textContent = `${wins}勝 ${losses}敗`;
 
   const list = document.getElementById('recentList');
-  const recent = trades.slice(0, 10);
+  // 表示件数を増やし、リスト側(recent-scroll)をスクロール可能にすることで
+  // 「見える最初の量」は変えずに続きを下にスクロールして見られるようにする
+  const recent = trades.slice(0, RECENT_LOAD_COUNT);
   if (recent.length === 0) {
     list.innerHTML = '<div class="empty-msg">まだ記録がありません</div>';
     return;
@@ -844,21 +860,25 @@ const entryDateEl = document.getElementById('entryDate');
 const todayStr = today.toISOString().split('T')[0];
 entryDateEl.value = todayStr;
 
-document.getElementById('amountMinus').addEventListener('click', () => {
+// ±ボタン: 数字を増減させるのではなく、今入力されている数値の符号を切り替えるだけにする
+function applyAmountSign(sign) {
   const el = document.getElementById('entryAmount');
-  const v = parseInt(el.value || '0');
-  el.value = v - 1000;
-});
-document.getElementById('amountPlus').addEventListener('click', () => {
-  const el = document.getElementById('entryAmount');
-  const v = parseInt(el.value || '0');
-  el.value = v + 1000;
-});
+  const raw = el.value.trim();
+  if (raw === '') return; // 未入力なら何もしない
+  const v = parseFloat(raw);
+  if (isNaN(v)) return;
+  el.value = sign * Math.abs(v);
+}
+document.getElementById('amountMinus').addEventListener('click', () => applyAmountSign(-1));
+document.getElementById('amountPlus').addEventListener('click', () => applyAmountSign(1));
 
 document.getElementById('btnSave').addEventListener('click', async () => {
   const date = document.getElementById('entryDate').value;
   const pair = document.getElementById('entryPair').value;
-  const amount = parseInt(document.getElementById('entryAmount').value);
+  // parseInt による小数切り捨てが積み重なって年間合計がMT4残高と数円ズレる原因だったため、
+  // 小数を保持しつつ四捨五入するよう変更(丸め方向の偏りをなくす)
+  const rawAmount = document.getElementById('entryAmount').value;
+  const amount = Math.round(parseFloat(rawAmount));
   const memo = document.getElementById('entryMemo').value.trim();
 
   if (!date) { showToast('日付を入力してください'); return; }
