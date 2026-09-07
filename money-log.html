@@ -92,7 +92,7 @@ body {
   }
 
   /* PAGES */
-  .page { display: none; padding: 16px; }
+  .page { display: none; padding: 16px; padding-bottom: 32px; }
   .page.active { display: block; }
 
   /* CARDS */
@@ -226,18 +226,9 @@ body {
     color: var(--text-sub);
     margin-bottom: 10px;
   }
-  /* 直近記録を一定件数までスクロールで見られるように。
-     max-height だと内容が短い時にスクロール自体が発生せず「動かない」ように見えたり、
-     一部の埋め込み表示でタッチスクロールが伝わらないことがあるため、
-     高さを固定した専用パネルにして touch-action / overflow を明示している */
-  .recent-scroll {
-    height: 360px;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-    overscroll-behavior: contain;
-    padding-right: 2px;
-  }
+  /* 直近記録は内側だけを固定高さでスクロールさせず、ページ全体の
+     自然なスクロールに任せる（環境によって内側スクロールが反応しない
+     問題を避けるため）。ナビは position:fixed なので常に最下部に残る。 */
   .trade-item {
     background: var(--card);
     border-radius: 14px;
@@ -619,9 +610,7 @@ body {
   </div>
 
   <div class="section-label">RECENT TRADES</div>
-  <div class="recent-scroll" id="recentScroll">
-    <div id="recentList"></div>
-  </div>
+  <div id="recentList"></div>
 </div>
 
 <!-- ENTRY PAGE -->
