@@ -190,6 +190,12 @@ body {
     color: var(--text);
     flex-shrink: 0;
   }
+  /* 現在選択中の符号（＋/－）がひと目でわかるように */
+  .amount-btn.active-sign {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
   .amount-row .form-input {
     text-align: center;
     font-family: 'M PLUS Rounded 1c', sans-serif;
@@ -220,11 +226,16 @@ body {
     color: var(--text-sub);
     margin-bottom: 10px;
   }
-  /* 直近記録を一定件数までスクロールで見られるように */
+  /* 直近記録を一定件数までスクロールで見られるように。
+     max-height だと内容が短い時にスクロール自体が発生せず「動かない」ように見えたり、
+     一部の埋め込み表示でタッチスクロールが伝わらないことがあるため、
+     高さを固定した専用パネルにして touch-action / overflow を明示している */
   .recent-scroll {
-    max-height: 420px;
-    overflow-y: auto;
+    height: 360px;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
     padding-right: 2px;
   }
   .trade-item {
@@ -860,17 +871,42 @@ const entryDateEl = document.getElementById('entryDate');
 const todayStr = today.toISOString().split('T')[0];
 entryDateEl.value = todayStr;
 
-// ±ボタン: 数字を増減させるのではなく、今入力されている数値の符号を切り替えるだけにする
-function applyAmountSign(sign) {
-  const el = document.getElementById('entryAmount');
-  const raw = el.value.trim();
-  if (raw === '') return; // 未入力なら何もしない
-  const v = parseFloat(raw);
-  if (isNaN(v)) return;
-  el.value = sign * Math.abs(v);
+// ±ボタン: 「数字を先に入力してからマイナスを押す」必要があったのをやめ、
+// 先にマイナスを押しておけば、その後に入力する数字が自動でマイナス表示されるようにする。
+// amountSign が現在の符号モード（1=プラス／-1=マイナス）。
+let amountSign = 1;
+const amountMinusBtn = document.getElementById('amountMinus');
+const amountPlusBtn = document.getElementById('amountPlus');
+const entryAmountEl = document.getElementById('entryAmount');
+
+function updateSignButtons() {
+  amountMinusBtn.classList.toggle('active-sign', amountSign === -1);
+  amountPlusBtn.classList.toggle('active-sign', amountSign === 1);
 }
-document.getElementById('amountMinus').addEventListener('click', () => applyAmountSign(-1));
-document.getElementById('amountPlus').addEventListener('click', () => applyAmountSign(1));
+
+function reformatAmountBySign() {
+  const raw = entryAmountEl.value;
+  if (raw === '' || raw === '-') return; // 入力途中/空はそのまま
+  const stripped = raw.replace(/-/g, '');
+  if (stripped === '') { entryAmountEl.value = ''; return; }
+  const num = parseFloat(stripped);
+  if (isNaN(num)) return;
+  entryAmountEl.value = amountSign === -1 ? -num : num;
+}
+
+function setAmountSign(sign) {
+  amountSign = sign;
+  updateSignButtons();
+  reformatAmountBySign(); // 既に何か入力されていれば、その場で符号を反映
+}
+
+amountMinusBtn.addEventListener('click', () => setAmountSign(-1));
+amountPlusBtn.addEventListener('click', () => setAmountSign(1));
+
+// 数字を入力するたびに、現在選択中の符号を自動で適用する
+entryAmountEl.addEventListener('input', reformatAmountBySign);
+
+updateSignButtons();
 
 document.getElementById('btnSave').addEventListener('click', async () => {
   const date = document.getElementById('entryDate').value;
@@ -887,6 +923,7 @@ document.getElementById('btnSave').addEventListener('click', async () => {
   await saveTrade({ date, pair, amount, memo });
   document.getElementById('entryAmount').value = '';
   document.getElementById('entryMemo').value = '';
+  setAmountSign(1); // 次の入力に備えて符号モードをプラスに戻す
   showToast('保存しました ✓');
 
   // ホームに戻る
