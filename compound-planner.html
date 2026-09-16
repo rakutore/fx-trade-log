@@ -255,16 +255,15 @@
   <div class="table-scroll">
     <table>
       <colgroup>
+        <col style="width:20%">
+        <col style="width:22%">
         <col style="width:16%">
-        <col style="width:18%">
-        <col style="width:14%">
-        <col style="width:16%">
-        <col style="width:18%">
-        <col style="width:18%" id="evenPaceCol">
+        <col style="width:20%">
+        <col style="width:22%">
       </colgroup>
       <thead>
         <tr>
-          <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th><th class="evenpace-th">均等ペース残高</th>
+          <th>月</th><th>投資金</th><th>利益率</th><th>利益額</th><th>次月持越</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -273,8 +272,8 @@
 
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
-    「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。（単利モードのみ、元々毎月一定額なので均等ペース欄は非表示になります）<br><br>
-    「均等ペース」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
+    「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。<br><br>
+    「均等ペース(毎月目標)」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です。
   </div>
 </div>
 
@@ -344,7 +343,6 @@
   const multipleVal = $('multipleVal');
   const evenPaceVal = $('evenPaceVal');
   const evenPaceCard = $('evenPaceCard');
-  const evenPaceCol = $('evenPaceCol');
   const saveBtn = $('saveBtn');
   const savedNote = $('savedNote');
   const rateNote = $('rateNote');
@@ -496,10 +494,6 @@
     const showEvenPace = calcMode !== 'simple';
     evenPaceCard.style.display = showEvenPace ? '' : 'none';
     evenPaceVal.textContent = `¥${fmt(evenPaceMonthly)}`;
-    evenPaceCol.style.display = showEvenPace ? '' : 'none';
-    document.querySelectorAll('.evenpace-th').forEach(el => {
-      el.style.display = showEvenPace ? '' : 'none';
-    });
 
     const maxVal = rows.length ? rows[rows.length - 1].next : 1;
     bars.innerHTML = rows.map(r =>
@@ -513,7 +507,6 @@
         <td class="rate">${displayRatePct.toFixed(2)}%</td>
         <td>${fmt(r.profit)}</td>
         <td class="next${r.next >= MILESTONE ? ' milestone' : ''}">${fmt(r.next)}</td>
-        ${showEvenPace ? `<td class="evenpace">${fmt(principal + evenPaceMonthly * r.m)}</td>` : ''}
       </tr>
     `).join('');
 
