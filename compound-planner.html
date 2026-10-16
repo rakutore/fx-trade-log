@@ -82,6 +82,7 @@
     position: sticky; top: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   thead th:first-child, tbody td:first-child { text-align: left; }
+  tbody td:first-child { white-space: normal; overflow: visible; text-overflow: clip; }
   thead th:nth-child(3) { text-align: center; }
   tbody td { padding: 9px 6px; text-align: right; border-bottom: 1px solid #1f1f1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tbody tr:nth-child(odd) { background: #141414; }
@@ -97,12 +98,10 @@
     font-style: normal;
   }
   tbody tr.taper-row td { border-top: 2px solid #6fa8dc; }
-  tbody tr.taper-row td:first-child::after {
-    content: " ⬇︎利率ダウン";
-    color: #6fa8dc;
-    font-size: 10px;
-    font-style: normal;
-  }
+  tbody tr.withdraw-row td { border-bottom: 2px solid #7fc97f; }
+  .row-badge { font-size: 10px; font-style: normal; font-weight: 400; margin-left: 6px; white-space: nowrap; }
+  .row-badge.rate-badge { color: #6fa8dc; }
+  .row-badge.withdraw-badge { color: #7fc97f; }
   .table-scroll { max-height: 440px; overflow-y: auto; border: 1px solid #2a2a2a; }
 
   .foot-note { margin-top: 16px; font-size: 11px; color: #6a6a6a; line-height: 1.6; }
@@ -113,16 +112,21 @@
   }
   .saved-note { font-size: 11px; color: #6a6a6a; }
 
-  .zone-row { display: grid; grid-template-columns: 1fr 90px 28px; gap: 8px; margin-bottom: 8px; align-items: center; }
-  .zone-row input[type=number] {
+  .zone-card { border: 1px solid #2a2a2a; border-radius: 4px; padding: 10px 10px 12px; margin-bottom: 10px; background: #111; }
+  .zone-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .zone-card-head span { font-size: 11px; color: #6a6a6a; letter-spacing: .04em; }
+  .zone-card .zone-remove {
+    background: #1a1a1a; border: 1px solid #333; color: #8a8a8a;
+    width: 26px; height: 26px; border-radius: 2px; font-size: 13px; line-height: 1;
+  }
+  .zone-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .zone-row:last-child { margin-bottom: 0; }
+  .zone-field .field-label { font-size: 10px; color: #7a7a7a; margin-bottom: 4px; }
+  .zone-field input[type=number] {
     width: 100%; background: #141414; border: 1px solid #333; color: #f0f0f0;
     padding: 9px 10px; font-size: 14px; outline: none; border-radius: 2px;
   }
-  .zone-row .zone-remove {
-    background: #1a1a1a; border: 1px solid #333; color: #8a8a8a;
-    width: 28px; height: 36px; border-radius: 2px; font-size: 14px; line-height: 1;
-  }
-  .zone-row .zone-sep { font-size: 11px; color: #6a6a6a; white-space: nowrap; }
+  .zone-row.withdraw-row-fields { border-top: 1px dashed #2a2a2a; padding-top: 8px; }
 
   /* EMAIL GATE（Money Logと同じ白基調のカードに統一） */
   .email-gate {
@@ -242,7 +246,7 @@
       <input type="number" id="stepupThreshold" step="1" value="100">
     </div>
     <div class="full" id="taperField" style="display:none;">
-      <div class="field-label">資金ゾーンごとの月利（資金がこの金額に達したら、この利率に切り替え）</div>
+      <div class="field-label">資金ゾーンごとの月利と出金ルール（出金ラインは任意。0のままなら出金なし）</div>
       <div id="taperZones"></div>
       <button type="button" class="toggle-btn" id="taperAddZone" style="margin-top:8px;">+ ゾーンを追加</button>
     </div>
@@ -297,7 +301,8 @@
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
     「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。<br><br>
-    「資金で逓減」は、資金が増えるほど利率(リスク)を段階的に下げていく計算方式です。「資金がこの金額に達したら、この利率に切り替え」というゾーンを自由に追加・編集でき、資金(その月の残高)が各ゾーンの金額以上になったタイミングでそのゾーンの利率に自動で切り替わります。最初は強気の利率で、資金が増えるにつれて利率を落としていく、というように「資金が増えるほど守りに入る」運用をそのまま再現できます。利率が切り替わった月は表に⬇︎マークと青い区切り線で表示されます。<br><br>
+    「資金で逓減」は、資金が増えるほど利率(リスク)を段階的に下げていく計算方式です。「資金がこの金額に達したら、この利率に切り替え」というゾーンを自由に追加・編集でき、資金(その月の残高)が各ゾーンの金額以上になったタイミングでそのゾーンの利率に自動で切り替わります。利率が切り替わった月は表に⬇︎マークと青い区切り線で表示されます。<br><br>
+    各ゾーンには「出金ライン」と「出金後に残す額」も設定できます（空欄や0のままなら出金なしでそのまま複利）。資金がそのゾーンの出金ラインに達した月は、自動で「残す額」まで資金を戻し、超えた分を出金した扱いにします。例えば出金ライン18万円・残す額10万円なら、資金が18万円に達した月に10万円まで戻し、差額の8万円を出金したものとして記録します。出金した月は表に✂️マークと緑の区切り線で表示され、「最終資産」は口座に残っている金額、「総利益」「倍率」は出金した分も含めた合計で計算されます。これにより「増えすぎた資金をそのまま持ち続けて怖くなる」のを防ぎ、一定額に達したら機械的に確定させる運用をシミュレーションできます。<br><br>
     「均等ペース(毎月目標)」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です（「資金で逓減」モードでは利率が一定でないため非表示になります）。
   </div>
 </div>
@@ -385,9 +390,9 @@
   // 資金ゾーンごとの月利。資金(carry)がthreshold以上になったらそのゾーンの利率を使う。
   // 60万円あたりで「楽になった」実感を元に、デフォルトはそのラインで利率を下げる形にしてある。
   let taperZones = [
-    { threshold: 0, rate: 15 },
-    { threshold: 600000, rate: 8 },
-    { threshold: 1500000, rate: 4 },
+    { threshold: 0, rate: 15, withdrawAt: 0, keep: 0 },
+    { threshold: 600000, rate: 8, withdrawAt: 0, keep: 0 },
+    { threshold: 1500000, rate: 4, withdrawAt: 0, keep: 0 },
   ];
   const MILESTONE = 100000000; // 1億円
 
@@ -419,10 +424,31 @@
 
   function renderTaperZones() {
     taperZonesEl.innerHTML = taperZones.map((z, i) => `
-      <div class="zone-row">
-        <input type="number" step="1000" value="${z.threshold}" data-idx="${i}" data-field="threshold" placeholder="資金がこの金額(円)以上で">
-        <input type="number" step="0.1" value="${z.rate}" data-idx="${i}" data-field="rate" placeholder="月利%">
-        <button type="button" class="zone-remove" data-remove="${i}" ${taperZones.length <= 1 ? 'disabled' : ''}>×</button>
+      <div class="zone-card">
+        <div class="zone-card-head">
+          <span>ゾーン ${i + 1}</span>
+          <button type="button" class="zone-remove" data-remove="${i}" ${taperZones.length <= 1 ? 'disabled' : ''}>×</button>
+        </div>
+        <div class="zone-row">
+          <div class="zone-field">
+            <div class="field-label">資金がこの金額(円)以上で</div>
+            <input type="number" step="1000" value="${z.threshold}" data-idx="${i}" data-field="threshold">
+          </div>
+          <div class="zone-field">
+            <div class="field-label">月利(%)</div>
+            <input type="number" step="0.1" value="${z.rate}" data-idx="${i}" data-field="rate">
+          </div>
+        </div>
+        <div class="zone-row withdraw-row-fields">
+          <div class="zone-field">
+            <div class="field-label">出金ライン(円) 任意</div>
+            <input type="number" step="1000" value="${z.withdrawAt || 0}" data-idx="${i}" data-field="withdrawAt">
+          </div>
+          <div class="zone-field">
+            <div class="field-label">出金後に残す額(円)</div>
+            <input type="number" step="1000" value="${z.keep || 0}" data-idx="${i}" data-field="keep">
+          </div>
+        </div>
       </div>
     `).join('');
   }
@@ -446,7 +472,7 @@
 
   taperAddZoneBtn.addEventListener('click', () => {
     const last = taperZones[taperZones.length - 1];
-    taperZones.push({ threshold: (last ? last.threshold : 0) + 500000, rate: last ? Math.max(1, last.rate - 2) : 10 });
+    taperZones.push({ threshold: (last ? last.threshold : 0) + 500000, rate: last ? Math.max(1, last.rate - 2) : 10, withdrawAt: 0, keep: 0 });
     taperZones.sort((a, b) => a.threshold - b.threshold);
     renderTaperZones();
     render();
@@ -529,9 +555,12 @@
     const sortedZones = [...taperZones].sort((a, b) => a.threshold - b.threshold);
     let currentZoneIdx = 0; // taperモード: 資金が増えてゾーンが変わった回数の追跡用
     let taperStepCount = 0;
+    let withdrawCount = 0;
+    let totalWithdrawn = 0;
     const rows = [];
     for (let m = 1; m <= months; m++) {
       let invest, profit, next, isStepup = false, rowRatePct = displayRatePct;
+      let isWithdraw = false, withdrawnAmount = 0;
       if (calcMode === 'simple') {
         // 単利: 毎月の投資金は常に初期投資金のまま、利益は積み上げるだけで再投資しない
         invest = principal;
@@ -561,12 +590,23 @@
           taperStepCount++;
         }
         currentZoneIdx = zoneIdx;
-        const zoneRate = (sortedZones[zoneIdx] ? sortedZones[zoneIdx].rate : 0) / 100;
+        const zone = sortedZones[zoneIdx] || { rate: 0 };
+        const zoneRate = (zone.rate || 0) / 100;
         rowRatePct = zoneRate * 100;
         invest = carry;
         profit = invest * zoneRate;
         next = invest + profit;
-        carry = next;
+        // 出金ルール: このゾーンに出金ラインが設定されていて、資金がそのラインに達したら
+        // 「出金後に残す額」まで資金を戻し、超過分は出金したものとして扱う（複利から切り離す）
+        if (zone.withdrawAt > 0 && next >= zone.withdrawAt) {
+          withdrawnAmount = Math.max(0, next - (zone.keep || 0));
+          carry = zone.keep || 0;
+          isWithdraw = true;
+          withdrawCount++;
+          totalWithdrawn += withdrawnAmount;
+        } else {
+          carry = next;
+        }
       } else {
         // 複利: 前月の残高(投資金+利益)を翌月の投資金として使う
         invest = carry;
@@ -574,12 +614,13 @@
         next = invest + profit;
         carry = next;
       }
-      rows.push({ m, invest, profit, next, isStepup, rowRatePct });
+      rows.push({ m, invest, profit, next, isStepup, rowRatePct, isWithdraw, withdrawnAmount, afterWithdraw: carry });
     }
 
-    const final = rows.length ? rows[rows.length - 1].next : principal;
-    const totalProfit = final - principal;
-    const multiple = principal > 0 ? final / principal : 0;
+    // taperモードは出金を引いた後の「口座残高」をfinalとする。総利益には出金した分も含める（出金=使えるお金になった利益なので）。
+    const final = rows.length ? (calcMode === 'taper' ? rows[rows.length - 1].afterWithdraw : rows[rows.length - 1].next) : principal;
+    const totalProfit = calcMode === 'taper' ? (final + totalWithdrawn) - principal : final - principal;
+    const multiple = principal > 0 ? (final + (calcMode === 'taper' ? totalWithdrawn : 0)) / principal : 0;
 
     finalVal.textContent = `¥${fmt(final)}`;
     finalVal.classList.toggle('milestone', final >= MILESTONE);
@@ -593,20 +634,32 @@
     evenPaceCard.style.display = showEvenPace ? '' : 'none';
     evenPaceVal.textContent = `¥${fmt(evenPaceMonthly)}`;
 
-    const maxVal = rows.length ? rows[rows.length - 1].next : 1;
+    const chartVal = (r) => calcMode === 'taper' ? r.afterWithdraw : r.next;
+    const maxVal = rows.length ? Math.max(...rows.map(chartVal)) : 1;
     bars.innerHTML = rows.map(r =>
-      `<div class="${r.next >= MILESTONE ? 'milestone' : (r.m === months ? 'last' : '')}" style="height:${Math.max(4, (r.next / maxVal) * 74)}px" title="${r.m}ヶ月目: ¥${fmt(r.next)}"></div>`
+      `<div class="${chartVal(r) >= MILESTONE ? 'milestone' : (r.m === months ? 'last' : '')}" style="height:${Math.max(4, (chartVal(r) / maxVal) * 74)}px" title="${r.m}ヶ月目: ¥${fmt(chartVal(r))}"></div>`
     ).join('');
 
-    tbody.innerHTML = rows.map(r => `
-      <tr class="${r.isStepup ? (calcMode === 'taper' ? 'taper-row' : 'stepup-row') : ''}">
-        <td>${r.m}ヶ月目</td>
+    tbody.innerHTML = rows.map(r => {
+      const rowClasses = [
+        r.isStepup ? (calcMode === 'taper' ? 'taper-row' : 'stepup-row') : '',
+        r.isWithdraw ? 'withdraw-row' : '',
+      ].filter(Boolean).join(' ');
+      let monthLabel = `${r.m}ヶ月目`;
+      if (calcMode === 'taper') {
+        if (r.isStepup) monthLabel += `<span class="row-badge rate-badge">⬇︎利率変更</span>`;
+        if (r.isWithdraw) monthLabel += `<span class="row-badge withdraw-badge">✂️出金 ¥${fmt(r.withdrawnAmount)}</span>`;
+      }
+      const nextDisplay = calcMode === 'taper' ? r.afterWithdraw : r.next;
+      return `
+      <tr class="${rowClasses}">
+        <td>${monthLabel}</td>
         <td>${fmt(r.invest)}</td>
         <td class="rate">${r.rowRatePct.toFixed(2)}%</td>
         <td>${fmt(r.profit)}</td>
-        <td class="next${r.next >= MILESTONE ? ' milestone' : ''}">${fmt(r.next)}</td>
-      </tr>
-    `).join('');
+        <td class="next${nextDisplay >= MILESTONE ? ' milestone' : ''}">${fmt(nextDisplay)}</td>
+      </tr>`;
+    }).join('');
 
     rateNote.textContent = rateMode === 'annual' && calcMode !== 'taper'
       ? `年利${inputRate}%を月換算(複利)すると月利${displayRatePct.toFixed(2)}%です。`
@@ -616,10 +669,14 @@
       rateNote.textContent = rateNote.textContent ? `${rateNote.textContent} ${extra}` : extra;
     }
     if (calcMode === 'taper') {
-      const extra = taperStepCount > 0
-        ? `${taperStepCount}回、資金ゾーンが切り替わり利率が変わりました（表の⬆︎マーク部分）。`
-        : '設定した期間内では資金ゾーンの切り替わりは発生していません。';
-      rateNote.textContent = rateNote.textContent ? `${rateNote.textContent} ${extra}` : extra;
+      const parts = [];
+      parts.push(taperStepCount > 0
+        ? `${taperStepCount}回、資金ゾーンが切り替わり利率が変わりました。`
+        : '設定した期間内では資金ゾーンの切り替わりは発生していません。');
+      if (withdrawCount > 0) {
+        parts.push(`${withdrawCount}回出金し、累計¥${fmt(totalWithdrawn)}を口座から出しています（最終資産・総利益にはこの出金分も含めています）。`);
+      }
+      rateNote.textContent = rateNote.textContent ? `${rateNote.textContent} ${parts.join(' ')}` : parts.join(' ');
     }
   }
 
