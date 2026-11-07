@@ -127,6 +127,13 @@
     padding: 9px 10px; font-size: 14px; outline: none; border-radius: 2px;
   }
   .zone-row.withdraw-row-fields { border-top: 1px dashed #2a2a2a; padding-top: 8px; }
+  .zone-sentence { font-size: 13px; color: #cfcfcf; margin-bottom: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .zone-sentence input[type=number] {
+    width: 110px; background: #141414; border: 1px solid #333; color: #f0f0f0;
+    padding: 8px 8px; font-size: 14px; outline: none; border-radius: 2px;
+  }
+  .zone-sentence.sub { font-size: 12px; color: #8a8a8a; border-top: 1px dashed #2a2a2a; padding-top: 8px; margin-bottom: 0; }
+  .zone-sentence.sub input[type=number] { width: 96px; }
 
   /* EMAIL GATE（Money Logと同じ白基調のカードに統一） */
   .email-gate {
@@ -246,9 +253,9 @@
       <input type="number" id="stepupThreshold" step="1" value="100">
     </div>
     <div class="full" id="taperField" style="display:none;">
-      <div class="field-label">資金ゾーンごとの月利と出金ルール（出金ラインは任意。0のままなら出金なし）</div>
+      <div class="field-label">ステップ表：資金がいくらになったら、月にいくら稼ぐ想定にするか（出金は任意）</div>
       <div id="taperZones"></div>
-      <button type="button" class="toggle-btn" id="taperAddZone" style="margin-top:8px;">+ ゾーンを追加</button>
+      <button type="button" class="toggle-btn" id="taperAddZone" style="margin-top:8px;">+ ステップを追加</button>
     </div>
   </div>
 
@@ -301,8 +308,8 @@
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
     「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。<br><br>
-    「資金で逓減」は、資金が増えるほど利率(リスク)を段階的に下げていく計算方式です。「資金がこの金額に達したら、この利率に切り替え」というゾーンを自由に追加・編集でき、資金(その月の残高)が各ゾーンの金額以上になったタイミングでそのゾーンの利率に自動で切り替わります。利率が切り替わった月は表に⬇︎マークと青い区切り線で表示されます。<br><br>
-    各ゾーンには「出金ライン」と「出金後に残す額」も設定できます（空欄や0のままなら出金なしでそのまま複利）。資金がそのゾーンの出金ラインに達した月は、自動で「残す額」まで資金を戻し、超えた分を出金した扱いにします。例えば出金ライン18万円・残す額10万円なら、資金が18万円に達した月に10万円まで戻し、差額の8万円を出金したものとして記録します。出金した月は表に✂️マークと緑の区切り線で表示され、「最終資産」は口座に残っている金額、「総利益」「倍率」は出金した分も含めた合計で計算されます。これにより「増えすぎた資金をそのまま持ち続けて怖くなる」のを防ぎ、一定額に達したら機械的に確定させる運用をシミュレーションできます。<br><br>
+    「資金で逓減」は、資金の額に応じて「月にいくら稼ぐ想定か」を段階的に変えていく計算方式です。ステップごとに「資金が◯円以上のとき、月に◯円稼ぐ想定」を入れてください（実際のロット運用で見込める金額をそのまま入れる使い方を想定しています）。稼ぐ金額は円で固定なので、資金が増えるほど利益率(%)は自動的に下がっていきます。ステップが切り替わった月は表に⬇︎マークと青い区切り線で表示されます。<br><br>
+    各ステップには「出金ライン」と「出金後に残す額」も設定できます（空欄や0のままなら出金なしでそのまま複利）。資金がそのステップの出金ラインに達した月は、自動で「残す額」まで資金を戻し、超えた分を出金した扱いにします。例えば出金ライン18万円・残す額10万円なら、資金が18万円に達した月に10万円まで戻し、差額の8万円を出金したものとして記録します。出金した月は表に✂️マークと緑の区切り線で表示され、「最終資産」は口座に残っている金額、「総利益」「倍率」は出金した分も含めた合計で計算されます。これにより「増えすぎた資金をそのまま持ち続けて怖くなる」のを防ぎ、一定額に達したら機械的に確定させる運用をシミュレーションできます。<br><br>
     「均等ペース(毎月目標)」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です（「資金で逓減」モードでは利率が一定でないため非表示になります）。
   </div>
 </div>
@@ -387,12 +394,12 @@
 
   let rateMode = 'monthly'; // 'monthly' | 'annual'
   let calcMode = 'compound'; // 'compound' | 'simple' | 'stepup' | 'taper'
-  // 資金ゾーンごとの月利。資金(carry)がthreshold以上になったらそのゾーンの利率を使う。
-  // 60万円あたりで「楽になった」実感を元に、デフォルトはそのラインで利率を下げる形にしてある。
+  // ステップ表: 資金(carry)がthreshold円以上のとき、毎月monthly円稼ぐ想定で計算する。
+  // 利率(%)は monthly ÷ 資金 で自動的に決まるので、資金が増えるほど%は自然に下がる。
   let taperZones = [
-    { threshold: 0, rate: 15, withdrawAt: 0, keep: 0 },
-    { threshold: 600000, rate: 8, withdrawAt: 0, keep: 0 },
-    { threshold: 1500000, rate: 4, withdrawAt: 0, keep: 0 },
+    { threshold: 0, monthly: 100000, withdrawAt: 0, keep: 0 },
+    { threshold: 150000, monthly: 120000, withdrawAt: 0, keep: 0 },
+    { threshold: 350000, monthly: 240000, withdrawAt: 0, keep: 0 },
   ];
   const MILESTONE = 100000000; // 1億円
 
@@ -426,29 +433,12 @@
     taperZonesEl.innerHTML = taperZones.map((z, i) => `
       <div class="zone-card">
         <div class="zone-card-head">
-          <span>ゾーン ${i + 1}</span>
+          <span>ステップ ${i + 1}</span>
           <button type="button" class="zone-remove" data-remove="${i}" ${taperZones.length <= 1 ? 'disabled' : ''}>×</button>
         </div>
-        <div class="zone-row">
-          <div class="zone-field">
-            <div class="field-label">資金がこの金額(円)以上で</div>
-            <input type="number" step="1000" value="${z.threshold}" data-idx="${i}" data-field="threshold">
-          </div>
-          <div class="zone-field">
-            <div class="field-label">月利(%)</div>
-            <input type="number" step="0.1" value="${z.rate}" data-idx="${i}" data-field="rate">
-          </div>
-        </div>
-        <div class="zone-row withdraw-row-fields">
-          <div class="zone-field">
-            <div class="field-label">出金ライン(円) 任意</div>
-            <input type="number" step="1000" value="${z.withdrawAt || 0}" data-idx="${i}" data-field="withdrawAt">
-          </div>
-          <div class="zone-field">
-            <div class="field-label">出金後に残す額(円)</div>
-            <input type="number" step="1000" value="${z.keep || 0}" data-idx="${i}" data-field="keep">
-          </div>
-        </div>
+        <div class="zone-sentence">資金が <input type="number" step="1000" value="${z.threshold}" data-idx="${i}" data-field="threshold"> 円以上のとき</div>
+        <div class="zone-sentence">月に <input type="number" step="1000" value="${z.monthly || 0}" data-idx="${i}" data-field="monthly"> 円 稼ぐ想定</div>
+        <div class="zone-sentence sub">出金(任意): <input type="number" step="1000" value="${z.withdrawAt || 0}" data-idx="${i}" data-field="withdrawAt"> 円に達したら <input type="number" step="1000" value="${z.keep || 0}" data-idx="${i}" data-field="keep"> 円残して出金</div>
       </div>
     `).join('');
   }
@@ -472,7 +462,7 @@
 
   taperAddZoneBtn.addEventListener('click', () => {
     const last = taperZones[taperZones.length - 1];
-    taperZones.push({ threshold: (last ? last.threshold : 0) + 500000, rate: last ? Math.max(1, last.rate - 2) : 10, withdrawAt: 0, keep: 0 });
+    taperZones.push({ threshold: (last ? last.threshold : 0) + 200000, monthly: last ? (last.monthly || 0) : 100000, withdrawAt: 0, keep: 0 });
     taperZones.sort((a, b) => a.threshold - b.threshold);
     renderTaperZones();
     render();
@@ -508,7 +498,15 @@
         if (d.rate != null) rateEl.value = d.rate;
         if (d.months != null) monthsEl.value = d.months;
         if (d.stepupThreshold != null) stepupThresholdEl.value = d.stepupThreshold;
-        if (Array.isArray(d.taperZones) && d.taperZones.length) taperZones = d.taperZones;
+        if (Array.isArray(d.taperZones) && d.taperZones.length) {
+          // 旧形式(月利%)で保存されていた場合は、円に換算して引き継ぐ
+          taperZones = d.taperZones.map(z => z.monthly != null ? z : {
+            threshold: z.threshold || 0,
+            monthly: Math.round(Math.max(z.threshold || 0, Number(principalEl.value) || 0) * (z.rate || 0) / 100),
+            withdrawAt: z.withdrawAt || 0,
+            keep: z.keep || 0,
+          });
+        }
         if (d.rateMode) setRateMode(d.rateMode);
         if (d.calcMode) setCalcMode(d.calcMode);
         savedNote.textContent = '保存済みの設定を読み込みました';
@@ -590,11 +588,10 @@
           taperStepCount++;
         }
         currentZoneIdx = zoneIdx;
-        const zone = sortedZones[zoneIdx] || { rate: 0 };
-        const zoneRate = (zone.rate || 0) / 100;
-        rowRatePct = zoneRate * 100;
+        const zone = sortedZones[zoneIdx] || { monthly: 0 };
         invest = carry;
-        profit = invest * zoneRate;
+        profit = zone.monthly || 0;
+        rowRatePct = invest > 0 ? (profit / invest) * 100 : 0;
         next = invest + profit;
         // 出金ルール: このゾーンに出金ラインが設定されていて、資金がそのラインに達したら
         // 「出金後に残す額」まで資金を戻し、超過分は出金したものとして扱う（複利から切り離す）
