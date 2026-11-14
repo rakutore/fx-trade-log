@@ -750,8 +750,8 @@ body {
     <div class="chart-head">
       <div class="card-label">PROFIT CURVE</div>
       <div class="chart-tabs" id="chartTabs">
-        <button class="chart-tab" data-range="month">今月</button>
-        <button class="chart-tab active" data-range="year">今年</button>
+        <button class="chart-tab active" data-range="month">今月</button>
+        <button class="chart-tab" data-range="year">今年</button>
         <button class="chart-tab" data-range="all">全期間</button>
       </div>
     </div>
@@ -867,7 +867,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 // 「今月」「今年」「全期間」を切り替えると、その期間の損益を日ごとに足し上げた
 // 累計(0円スタート)の推移を折れ線で表示する。グラフ上をなぞる(スマホは指でスライド)と、
 // その日の累計額が上の表示欄に出る。
-let chartRange = 'year';
+let chartRange = 'month';
 let lastTrades = [];
 let chartPoints = [];
 let chartCoords = [];
