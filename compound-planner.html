@@ -253,9 +253,29 @@
       <input type="number" id="stepupThreshold" step="1" value="100">
     </div>
     <div class="full" id="taperField" style="display:none;">
-      <div class="field-label">ステップ表：資金がいくらになったら、月にいくら稼ぐ想定にするか（出金は任意）</div>
-      <div id="taperZones"></div>
-      <button type="button" class="toggle-btn" id="taperAddZone" style="margin-top:8px;">+ ステップを追加</button>
+      <div class="field-label">ルール：資金◯円ごとに0.01ロット。毎月、利益から決まった額を元金に足し、残りは出金</div>
+      <div class="grid2" style="margin-bottom:0;">
+        <div>
+          <div class="field-label">0.01ロットあたりの月利益 (円)</div>
+          <input type="number" id="tpProfitPerLot" step="1000" value="100000">
+        </div>
+        <div>
+          <div class="field-label">毎月足す元金 (円)</div>
+          <input type="number" id="tpAdd" step="1000" value="100000">
+        </div>
+        <div>
+          <div class="field-label">◯円ごとに0.01ロット</div>
+          <input type="number" id="tpPerLot" step="1000" value="100000">
+        </div>
+        <div>
+          <div class="field-label">緩める資金ライン (円・0なら緩めない)</div>
+          <input type="number" id="tpEaseLine" step="10000" value="300000">
+        </div>
+        <div class="full">
+          <div class="field-label">ラインを超えた分は、◯円ごとに0.01ロット</div>
+          <input type="number" id="tpEasedPerLot" step="1000" value="150000">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -308,8 +328,7 @@
   <div class="foot-note">
     初期投資金・月利・期間を変えると全行が自動で再計算されます。「この設定を保存」を押すとこの端末のブラウザに記憶され、次回開いたときに復元されます。<br><br>
     「複利」は前月の残高に対して利益率をかけ続ける通常の複利計算です。「単利」は毎月常に初期投資金に対してだけ利益率をかけ、利益を再投資せず積み上げていく計算です。「資金増でロットアップ」は、ロットの基準額を毎月ではなく、資金が基準額の+指定%に達したタイミングだけ引き上げる計算方式です（例：しきい値100%なら資金が2倍になるたびにロットを倍にする、というような運用ルールをそのまま反映できます）。ロットアップした月は表に⬆︎マークと金色の区切り線で表示されます。<br><br>
-    「資金で逓減」は、資金の額に応じて「月にいくら稼ぐ想定か」を段階的に変えていく計算方式です。ステップごとに「資金が◯円以上のとき、月に◯円稼ぐ想定」を入れてください（実際のロット運用で見込める金額をそのまま入れる使い方を想定しています）。稼ぐ金額は円で固定なので、資金が増えるほど利益率(%)は自動的に下がっていきます。ステップが切り替わった月は表に⬇︎マークと青い区切り線で表示されます。<br><br>
-    各ステップには「出金ライン」と「出金後に残す額」も設定できます（空欄や0のままなら出金なしでそのまま複利）。資金がそのステップの出金ラインに達した月は、自動で「残す額」まで資金を戻し、超えた分を出金した扱いにします。例えば出金ライン18万円・残す額10万円なら、資金が18万円に達した月に10万円まで戻し、差額の8万円を出金したものとして記録します。出金した月は表に✂️マークと緑の区切り線で表示され、「最終資産」は口座に残っている金額、「総利益」「倍率」は出金した分も含めた合計で計算されます。これにより「増えすぎた資金をそのまま持ち続けて怖くなる」のを防ぎ、一定額に達したら機械的に確定させる運用をシミュレーションできます。<br><br>
+    「資金で逓減」は、「資金◯円ごとに0.01ロット」というルールで、毎月の利益から決まった額だけ元金に足し、残りを出金していく計算方式です。ロット数は月初の資金で決まり、利益は「ロット数×0.01ロットあたりの月利益」です。「緩める資金ライン」を超えた分は、より多い金額ごとに0.01ロットと数えるので、資金に対するリスクが下がります。利益が「毎月足す元金」に満たない月は、利益の全額を元金に足し、出金はなしとします。出金した月は表に✂️マークと緑の区切り線、各月のロットも表示されます。「最終資産」は口座に残っている金額、「総利益」「倍率」は出金した分も含めた合計です。<br><br>
     「均等ペース(毎月目標)」は、初期投資金に対して複利1ヶ月目と同じ利益率を毎月ずっと維持した場合の、固定の目標利益額です。期間を長くしても複利の最終着地点に引っ張られて膨らむことはなく、常に「今の元手に対して無理なく狙えそうな金額」が基準になります。複利通りに毎月ロットを引き上げていく代わりに、この固定額を毎月の目標にする、という運用向けの参考値です（「資金で逓減」モードでは利率が一定でないため非表示になります）。
   </div>
 </div>
@@ -389,18 +408,16 @@
   const stepupField = $('stepupField');
   const stepupThresholdEl = $('stepupThreshold');
   const taperField = $('taperField');
-  const taperZonesEl = $('taperZones');
-  const taperAddZoneBtn = $('taperAddZone');
+  const tp = {
+    profitPerLot: $('tpProfitPerLot'),
+    add: $('tpAdd'),
+    perLot: $('tpPerLot'),
+    easeLine: $('tpEaseLine'),
+    easedPerLot: $('tpEasedPerLot'),
+  };
 
   let rateMode = 'monthly'; // 'monthly' | 'annual'
   let calcMode = 'compound'; // 'compound' | 'simple' | 'stepup' | 'taper'
-  // ステップ表: 資金(carry)がthreshold円以上のとき、毎月monthly円稼ぐ想定で計算する。
-  // 利率(%)は monthly ÷ 資金 で自動的に決まるので、資金が増えるほど%は自然に下がる。
-  let taperZones = [
-    { threshold: 0, monthly: 100000, withdrawAt: 0, keep: 0 },
-    { threshold: 150000, monthly: 120000, withdrawAt: 0, keep: 0 },
-    { threshold: 350000, monthly: 240000, withdrawAt: 0, keep: 0 },
-  ];
   const MILESTONE = 100000000; // 1億円
 
   const fmt = (n) => Math.round(n).toLocaleString('ja-JP');
@@ -426,45 +443,6 @@
     const btn = e.target.closest('.toggle-btn');
     if (!btn) return;
     setRateMode(btn.dataset.mode);
-    render();
-  });
-
-  function renderTaperZones() {
-    taperZonesEl.innerHTML = taperZones.map((z, i) => `
-      <div class="zone-card">
-        <div class="zone-card-head">
-          <span>ステップ ${i + 1}</span>
-          <button type="button" class="zone-remove" data-remove="${i}" ${taperZones.length <= 1 ? 'disabled' : ''}>×</button>
-        </div>
-        <div class="zone-sentence">資金が <input type="number" step="1000" value="${z.threshold}" data-idx="${i}" data-field="threshold"> 円以上のとき</div>
-        <div class="zone-sentence">月に <input type="number" step="1000" value="${z.monthly || 0}" data-idx="${i}" data-field="monthly"> 円 稼ぐ想定</div>
-        <div class="zone-sentence sub">出金(任意): <input type="number" step="1000" value="${z.withdrawAt || 0}" data-idx="${i}" data-field="withdrawAt"> 円に達したら <input type="number" step="1000" value="${z.keep || 0}" data-idx="${i}" data-field="keep"> 円残して出金</div>
-      </div>
-    `).join('');
-  }
-
-  taperZonesEl.addEventListener('input', (e) => {
-    const input = e.target.closest('input[data-idx]');
-    if (!input) return;
-    const idx = Number(input.dataset.idx);
-    const field = input.dataset.field;
-    taperZones[idx][field] = Number(input.value) || 0;
-    render();
-  });
-
-  taperZonesEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-remove]');
-    if (!btn || taperZones.length <= 1) return;
-    taperZones.splice(Number(btn.dataset.remove), 1);
-    renderTaperZones();
-    render();
-  });
-
-  taperAddZoneBtn.addEventListener('click', () => {
-    const last = taperZones[taperZones.length - 1];
-    taperZones.push({ threshold: (last ? last.threshold : 0) + 200000, monthly: last ? (last.monthly || 0) : 100000, withdrawAt: 0, keep: 0 });
-    taperZones.sort((a, b) => a.threshold - b.threshold);
-    renderTaperZones();
     render();
   });
 
@@ -498,21 +476,12 @@
         if (d.rate != null) rateEl.value = d.rate;
         if (d.months != null) monthsEl.value = d.months;
         if (d.stepupThreshold != null) stepupThresholdEl.value = d.stepupThreshold;
-        if (Array.isArray(d.taperZones) && d.taperZones.length) {
-          // 旧形式(月利%)で保存されていた場合は、円に換算して引き継ぐ
-          taperZones = d.taperZones.map(z => z.monthly != null ? z : {
-            threshold: z.threshold || 0,
-            monthly: Math.round(Math.max(z.threshold || 0, Number(principalEl.value) || 0) * (z.rate || 0) / 100),
-            withdrawAt: z.withdrawAt || 0,
-            keep: z.keep || 0,
-          });
-        }
+        if (d.taper) Object.keys(tp).forEach(k => { if (d.taper[k] != null) tp[k].value = d.taper[k]; });
         if (d.rateMode) setRateMode(d.rateMode);
         if (d.calcMode) setCalcMode(d.calcMode);
         savedNote.textContent = '保存済みの設定を読み込みました';
       }
     } catch (e) { /* ignore */ }
-    renderTaperZones();
   }
 
   function save() {
@@ -521,7 +490,7 @@
       rate: Number(rateEl.value) || 0,
       months: Number(monthsEl.value) || 1,
       stepupThreshold: Number(stepupThresholdEl.value) || 100,
-      taperZones,
+      taper: Object.fromEntries(Object.entries(tp).map(([k, el]) => [k, Number(el.value) || 0])),
       rateMode,
       calcMode,
     };
@@ -550,15 +519,19 @@
     let lotBase = principal; // 現在のロット計算の基準額（ロットアップで更新される）
     const stepupThresholdPct = Number(stepupThresholdEl.value) || 0;
     let stepupCount = 0;
-    const sortedZones = [...taperZones].sort((a, b) => a.threshold - b.threshold);
-    let currentZoneIdx = 0; // taperモード: 資金が増えてゾーンが変わった回数の追跡用
-    let taperStepCount = 0;
     let withdrawCount = 0;
     let totalWithdrawn = 0;
+    const tpv = {
+      profitPerLot: Number(tp.profitPerLot.value) || 0,
+      add: Number(tp.add.value) || 0,
+      perLot: Number(tp.perLot.value) || 100000,
+      easeLine: Number(tp.easeLine.value) || 0,
+      easedPerLot: Number(tp.easedPerLot.value) || 0,
+    };
     const rows = [];
     for (let m = 1; m <= months; m++) {
       let invest, profit, next, isStepup = false, rowRatePct = displayRatePct;
-      let isWithdraw = false, withdrawnAmount = 0;
+      let isWithdraw = false, withdrawnAmount = 0, lots = 0;
       if (calcMode === 'simple') {
         // 単利: 毎月の投資金は常に初期投資金のまま、利益は積み上げるだけで再投資しない
         invest = principal;
@@ -577,32 +550,27 @@
           stepupCount++;
         }
       } else if (calcMode === 'taper') {
-        // 資金で逓減: 資金(carry)が属するゾーンの月利を使って複利計算する。
-        // 資金が増えてより高い閾値のゾーンに入ったら、そのぶん月利が下がる（リスクを落とす）。
-        let zoneIdx = 0;
-        for (let i = 0; i < sortedZones.length; i++) {
-          if (carry >= sortedZones[i].threshold) zoneIdx = i;
-        }
-        if (zoneIdx > currentZoneIdx) {
-          isStepup = true;
-          taperStepCount++;
-        }
-        currentZoneIdx = zoneIdx;
-        const zone = sortedZones[zoneIdx] || { monthly: 0 };
+        // 資金◯円ごとに0.01ロット。利益から決まった額だけ元金に足し、残りは出金する。
         invest = carry;
-        profit = zone.monthly || 0;
-        rowRatePct = invest > 0 ? (profit / invest) * 100 : 0;
+        const easedPerLot = tpv.easedPerLot > 0 ? tpv.easedPerLot : tpv.perLot;
+        let units;
+        if (tpv.easeLine > 0 && invest > tpv.easeLine) {
+          units = Math.floor(tpv.easeLine / tpv.perLot) + Math.floor((invest - tpv.easeLine) / easedPerLot);
+        } else {
+          units = Math.floor(invest / tpv.perLot);
+        }
+        if (invest > 0 && units < 1) units = 1; // 最小0.01ロットは常に持つ
+        lots = units / 100;
+        profit = units * tpv.profitPerLot;
+        const addAmt = Math.min(tpv.add, profit);
+        withdrawnAmount = profit - addAmt;
         next = invest + profit;
-        // 出金ルール: このゾーンに出金ラインが設定されていて、資金がそのラインに達したら
-        // 「出金後に残す額」まで資金を戻し、超過分は出金したものとして扱う（複利から切り離す）
-        if (zone.withdrawAt > 0 && next >= zone.withdrawAt) {
-          withdrawnAmount = Math.max(0, next - (zone.keep || 0));
-          carry = zone.keep || 0;
+        carry = invest + addAmt;
+        rowRatePct = invest > 0 ? (profit / invest) * 100 : 0;
+        if (withdrawnAmount > 0) {
           isWithdraw = true;
           withdrawCount++;
           totalWithdrawn += withdrawnAmount;
-        } else {
-          carry = next;
         }
       } else {
         // 複利: 前月の残高(投資金+利益)を翌月の投資金として使う
@@ -611,7 +579,7 @@
         next = invest + profit;
         carry = next;
       }
-      rows.push({ m, invest, profit, next, isStepup, rowRatePct, isWithdraw, withdrawnAmount, afterWithdraw: carry });
+      rows.push({ m, invest, profit, next, isStepup, rowRatePct, isWithdraw, withdrawnAmount, lots, afterWithdraw: carry });
     }
 
     // taperモードは出金を引いた後の「口座残高」をfinalとする。総利益には出金した分も含める（出金=使えるお金になった利益なので）。
@@ -644,7 +612,7 @@
       ].filter(Boolean).join(' ');
       let monthLabel = `${r.m}ヶ月目`;
       if (calcMode === 'taper') {
-        if (r.isStepup) monthLabel += `<span class="row-badge rate-badge">⬇︎利率変更</span>`;
+        monthLabel += `<span class="row-badge rate-badge">${r.lots.toFixed(2)}ロット</span>`;
         if (r.isWithdraw) monthLabel += `<span class="row-badge withdraw-badge">✂️出金 ¥${fmt(r.withdrawnAmount)}</span>`;
       }
       const nextDisplay = calcMode === 'taper' ? r.afterWithdraw : r.next;
@@ -667,9 +635,7 @@
     }
     if (calcMode === 'taper') {
       const parts = [];
-      parts.push(taperStepCount > 0
-        ? `${taperStepCount}回、資金ゾーンが切り替わり利率が変わりました。`
-        : '設定した期間内では資金ゾーンの切り替わりは発生していません。');
+      parts.push(`最終月のロットは${(rows.length ? rows[rows.length - 1].lots : 0).toFixed(2)}ロットです。`);
       if (withdrawCount > 0) {
         parts.push(`${withdrawCount}回出金し、累計¥${fmt(totalWithdrawn)}を口座から出しています（最終資産・総利益にはこの出金分も含めています）。`);
       }
@@ -677,7 +643,7 @@
     }
   }
 
-  [principalEl, rateEl, monthsEl, stepupThresholdEl].forEach(el => el.addEventListener('input', render));
+  [principalEl, rateEl, monthsEl, stepupThresholdEl, ...Object.values(tp)].forEach(el => el.addEventListener('input', render));
   saveBtn.addEventListener('click', save);
 
   load();
